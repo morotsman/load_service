@@ -10,6 +10,11 @@ libraryDependencies ++= Seq(
   jdbc,
   cache,
   ws,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
+  "org.webjars" % "angularjs" % "1.5.8",
+  "org.webjars" % "requirejs" % "2.1.11-1", 
+  "org.webjars" % "bootstrap" % "3.3.7-1",
+  "org.webjars" % "jquery" % "2.2.4",
+  "org.webjars" % "flot" % "0.8.3"
 )
 

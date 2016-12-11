@@ -3,10 +3,16 @@
 # ~~~~
 
 
+GET     /                           controllers.HomeController.index
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 GET    /load-resource			    controllers.LoadController.listLoadResources
+
+GET    /load-resource/:name			controllers.LoadController.getLoadResource(name)
+
+POST   /load-resource               controllers.LoadController.createLoadResource
 
 PUT    /load-resource/:name			controllers.LoadController.updateLoadResource(name)
 

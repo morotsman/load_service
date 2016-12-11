@@ -35,7 +35,23 @@ class LoadController @Inject() (actorSystem: ActorSystem,ws: WSClient)(implicit 
     (loadManagerActor ? ListLoadResources).mapTo[Set[String]].map { msg => Ok(Json.toJson(msg)) }
   }
   
-def updateLoadResource(name: String) = Action.async(BodyParsers.parse.json) { request =>
+  def getLoadResource(name: String) = Action.async {
+    (loadManagerActor ? GetLoadResource(name)).mapTo[Option[LoadSpec]].map { 
+      case Some(msg) => Ok(Json.toJson(msg)) 
+      case None => NotFound
+    }
+  }
+  
+  def createLoadResource() = Action.async(BodyParsers.parse.json) { request =>
+    request.body.validate[LoadSpec].map {
+      loadSpec => (loadManagerActor ? CreateLoadReource(loadSpec)).mapTo[LoadSpec].map { msg => Ok(Json.toJson(msg)) }
+    }.recoverTotal {
+      errors => Future.successful(BadRequest("Bad request: " + JsError.toFlatJson(errors)))
+    }
+  }
+  
+  
+  def updateLoadResource(name: String) = Action.async(BodyParsers.parse.json) { request =>
     request.body.validate[LoadSpec].map {
       loadSpec => (loadManagerActor ? UpdateLoadResource(name,loadSpec)).mapTo[LoadSpec].map { msg => Ok(Json.toJson(msg)) }
     }.recoverTotal {

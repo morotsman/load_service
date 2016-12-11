@@ -1,20 +1,196 @@
-@*
- * This template takes a single argument, a String containing a
- * message to display.
- *@
-@(message: String)
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Load service</title>
+<link rel="shortcut icon" type="image/png"
+	href="@routes.Assets.versioned("images/favicon.png")">
+<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+<link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.css")">
+<script data-main="@routes.Assets.versioned("javascripts/main.js")" src="@routes.Assets.versioned("lib/requirejs/require.js")"></script>
+</head>
+<body ng-controller="loadServiceCtrl">
 
-@*
- * Call the `main` template with two arguments. The first
- * argument is a `String` with the title of the page, the second
- * argument is an `Html` object containing the body of the page.
- *@
-@main("Welcome to Play") {
 
-    @*
-     * Get an `Html` object by calling the built-in Play welcome
-     * template and passing a `String` message.
-     *@
-    @play20.welcome(message, style = "Scala")
 
-}
+
+	<br>
+	<div style="margin-left: 80px; margin-right: 80px" ng-cloak>
+
+		<div id="IntroPage" ng-hide="introCompleted">
+			<div style="background-color: #fafafa;" class="row load_service_container">
+				<div class="col-md-12 text-center">
+					<h1>Load service</h1>
+				</div>
+				<div class="col-md-12 text-center">
+					<p>A simple load service for sending http requests. Create and
+						configure a load service with just a few clicks and keystrokes...</p>
+				</div>
+				<div style="margin-top: 100px" class="col-md-12 text-center">
+					<p>
+						<button ng-show="loadResourceList.length == 0" class="btn btn-primary btn-lg" ng-click="newLoadResource();introCompleted=true">New load service!</button>
+					</p>
+					<p>
+						<button ng-show="loadResourceList.length > 0" class="btn btn-primary btn-lg" ng-click="introCompleted=true">List load services</button>
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div id="resourcePage" ng-show="introCompleted">
+			<div class="row">
+				<div class="col-md-12 text-center"><h1>Load services</h1></div>
+			</div>
+			
+			<div ng-repeat="resource in loadResourceList">
+				<div ng-show="!resource.create"
+					class="load_service_container row flippable {{resource.currentSide}}">
+					<div style="background-color: #fafafa;"
+						class="flippable_content front">
+						<div class="col-md-11">
+							<h3>
+								<span ng-bind="resource.method"></span><span> </span><span
+									ng-bind="resource.url"></span>
+							</h3>
+						</div>
+						<div class="col-md-1">
+							<button type="button" class="btn btn-info"
+								ng-click="showInfo($index)" style="margin-top: 20px">Info</button>
+						</div>
+
+
+						<div class="col-md-6">
+							<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
+								type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
+								id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
+						</div>
+						<div class="col-md-6">
+							<label for="numberOfRequestPerSecond">Number of requests per second</label> <input
+								type="text" ng-model="resource.numberOfRequestPerSecond"
+								class="form-control" id="numberOfRequestPerSecond"
+								placeholder="Number of requests per second">
+						</div>
+						<div class="col-md-12">
+							<label for="body">Body</label>
+							<textarea rows="5" ng-model="resource.body" class="form-control"
+								id="body" placeholder="Body"></textarea>
+						</div>
+						<div style="margin-top: 20px" class="col-md-2">
+							<p>
+								<button class="btn btn-success" ng-click="updateLoadResource($index)">Update
+									service</button>
+							</p>
+						</div>
+						<div style="margin-top: 20px" class="col-md-2">
+							<p>
+								<button class="btn btn-danger" ng-click="deleteLoadResource($index)">Delete
+									service</button>
+							</p>
+						</div>
+
+					</div>
+					<div style="background-color: #fafafa;"
+						class="flippable_content back">
+
+						<div class="col-md-11">
+							<h3>
+								<span ng-bind="resource.method"></span><span> </span><span
+									ng-bind="resource.ul"></span>
+							</h3>
+						</div>
+						<div class="col-md-1">
+							<button type="button" class="btn btn-info"
+								ng-click="showInfo($index)" style="margin-top: 20px">Load service</button>
+						</div>
+
+
+						<div class="container">
+							<div class="col-md-6">
+								<h4 class="text-center">Incoming Requests</h4>
+								<div id="statistics" class="big-chart">
+									<div class="chart-holder">
+										<div class="chart"
+											id="{{'incoming' + resource.method + resource.path}}"></div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<h4 class="text-center">Outgoing Requests</h4>
+								<div id="statistics" class="big-chart">
+									<div class="chart-holder">
+										<div class="chart"
+											id="{{'completed' + resource.method + resource.path}}"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+
+				<div style="background-color: #fafafa;" class="row load_service_container"
+					ng-show="resource.create">
+					<div class="col-md-6">
+						<label for="method">Http Method</label>
+						<select class="form-control" name="method" ng-model="resource.method">
+					    	<option value="GET">GET</option>
+					      	<option value="PUT">PUT</option>
+					      	<option value="POST">POST</option>
+					      	<option value="DELETE">DELETE</option>
+					    </select>
+					</div>
+					<div class="col-md-6">
+						<label for="path">Url</label> <input type="text"
+							ng-model=resource.url class="form-control" id="url"
+							placeholder="Path to resource">
+					</div>
+					<div class="col-md-6">
+						<label for="timeout">Max time for request in millis</label> <input type="text"
+							ng-model="resource.maxTimeForRequestInMillis" class="form-control"
+							id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
+					</div>
+					<div class="col-md-6">
+						<label for="numberOfRequestPerSecond">Number of requests per second</label> <input
+							type="text" ng-model="resource.numberOfRequestPerSecond"
+							class="form-control" id="numberOfRequestPerSecond"
+							placeholder="Number of requests per second">
+					</div>
+					<div class="col-md-12">
+						<label for="body">Body</label>
+						<textarea rows="5" ng-model="resource.body" class="form-control"
+							id="body" placeholder="Body"></textarea>
+					</div>
+					<div style="margin-top: 20px" class="col-md-2">
+						<p>
+							<button class="btn btn-success" ng-click="createLoadResource($index)">Create
+								service</button>
+						</p>
+
+					</div>
+					<div style="margin-top: 20px" class="col-md-2">
+						<p>
+							<button class="btn btn-danger" ng-click="deleteLoadResource($index)">Delete
+								service</button>
+						</p>
+					</div>
+				</div>
+			</div>
+			<div style="background-color: #fafafa;" class="row load_service_container" ng-show="!serviceUnderConstruction">
+				<div style="margin-top: 100px" class="col-md-12 text-center">
+					<p>
+						<button class="btn btn-primary btn-lg" ng-click="newLoadResource()">New service!</button>
+					</p>
+				</div>
+			</div>
+		</div>
+		
+
+
+	</div>
+
+
+
+
+</body>
+</html>

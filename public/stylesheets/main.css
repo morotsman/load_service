@@ -1,0 +1,74 @@
+.load_service_container {
+	height:330px;
+	border:1px solid;
+	border-color:#ddd;
+	border-radius: 4px 4px 0 0;
+	margin-bottom:20px
+}
+
+.flippable {
+	
+  position: relative;
+  z-index: 1;
+  transform-style: preserve-3d;
+  -webkit-transform-style:preserve-3d; 
+  transition: all 0.5s linear;
+  -webkit-transition: all 0.5s linear;
+}
+
+.flippable_front {}
+
+.flippable_back {}
+
+.flippable_back.flippable {
+  transform: rotateY(180deg);
+  -webkit-transform:rotateY(180deg);
+}
+
+
+.flippable_content {
+  width: 100%;
+  height: 100%;
+  
+  
+}
+
+.flippable_back > .flippable_content.front {
+	display:none
+}
+
+.flippable_front > .flippable_content.back {
+	display:none
+}
+
+
+.flippable_content.front {
+	
+}
+
+.flippable_content.back { 
+  transform: rotateY(180deg);
+  -webkit-transform:rotateY(180deg);
+}
+
+
+
+
+.big-chart {
+  width:100%;
+  height:220px;
+}
+
+.chart {
+  position: relative;
+  width: 400px;
+  height: 210px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}

@@ -13,9 +13,10 @@ object LoadManagerActor {
   def props(ws:WSClient) = Props[LoadManagerActor](new LoadManagerActor(ws))
 
   case class ListLoadResources()
-  case class GetLoadResource(name: String)
-  case class UpdateLoadResource(name: String, loadSpec: LoadSpec)
-  case class DeleteLoadResource(name: String)
+  case class GetLoadResource(index: String)
+  case class CreateLoadReource(loadSpec: LoadSpec)
+  case class UpdateLoadResource(index: String, loadSpec: LoadSpec)
+  case class DeleteLoadResource(index: String)
 
   case class ListLoadSessions()
   case class StartLoadSession(name: String)
@@ -28,6 +29,8 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
   var ongoingSessions: Map[String, ActorRef] = Map()
 
   var loadResources: Map[String, LoadSpec] = Map()
+  
+  var index:Integer = 0
   
   def hasSession(name: String): Boolean = 
     ongoingSessions.get(name).map(s => true).getOrElse(false)
@@ -42,7 +45,7 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
         case None => 404
         case Some(s) =>
           val session = context.actorOf(LoadSessionActor.props(name,s,ws), "load-session-" + name)
-          ongoingSessions += (name->session)
+          ongoingSessions += (name -> session)
           session ! StartSession
           201
         }
@@ -59,12 +62,18 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
       }
     case ListLoadResources =>
       sender ! loadResources.keys
+    case CreateLoadReource(loadSpec) =>
+      loadResources = loadResources + ((index+"") -> loadSpec)
+      index = index + 1
+      sender ! loadSpec
     case UpdateLoadResource(name, loadSpec) =>
       loadResources = loadResources + (name -> loadSpec)
       sender ! loadSpec
     case DeleteLoadResource(name) =>
       loadResources = loadResources - name
       sender ! "Ok"
+    case GetLoadResource(name) =>
+      sender ! loadResources.get(name)
 
   }
 
