@@ -74,8 +74,13 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
     case UpdateLoadResource(name, loadSpec) =>
       loadResources = loadResources + (name -> loadSpec)
       sender ! loadSpec
-    case DeleteLoadResource(name) =>//TODO should also delete session if active
+    case DeleteLoadResource(name) =>
       loadResources = loadResources - name
+      context.child("load-session-" + name) match {
+        case None => 
+        case Some(a) => 
+          a ! EndSession
+      }
       sender ! "Ok"
     case GetLoadResource(name) =>
       sender ! loadResources.get(name)
