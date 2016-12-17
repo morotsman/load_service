@@ -16,6 +16,8 @@ require([ 'angular', './load-service-dao' ], function() {
 				$scope.createLoadResource = createLoadResource;
 				$scope.updateLoadResource = updateLoadResource;
 				$scope.deleteLoadResource= deleteLoadResource;
+				$scope.startSession = startSession;
+				$scope.stopSession = stopSession;
 				$scope.loadResourceList = [];
 				$scope.showInfo = showInfo;
 		
@@ -88,6 +90,15 @@ require([ 'angular', './load-service-dao' ], function() {
 					delete plotData["incoming" + resourceToDelete.method + resourceToDelete.path];
 					delete plotData["completed" + resourceToDelete.method + resourceToDelete.path];
 				}
+				
+				function startSession(index) {
+					loadServiceDao.createSession($scope.loadResourceList[index]);
+				}
+				
+				function stopSession(index) {
+					loadServiceDao.deleteSession($scope.loadResourceList[index]);
+				}
+				
 
 				function getChartOptions () {
 					return {

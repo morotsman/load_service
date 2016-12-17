@@ -48,6 +48,14 @@ define([ 'angular' ], function(angular) {
 		function updateLoadResource(loadResource) {
 			return $http.put("load-resource/" + loadResource.name, mapLoadResource(loadResource));
 		}
+		
+		function createSession(loadResource) {
+			return $http.put("load-session/" + loadResource.name)
+		}
+		
+		function deleteSession(loadResource) {
+			return $http.delete("load-session/" + loadResource.name)
+		}
 
 		
 		return {
@@ -55,7 +63,9 @@ define([ 'angular' ], function(angular) {
 			getLoadResourceDetails : getLoadResourceDetails,
 			createLoadResource : createLoadResource,
 			deleteLoadResource : deleteLoadResource,
-			updateLoadResource : updateLoadResource
+			updateLoadResource : updateLoadResource,
+			createSession: createSession,
+			deleteSession: deleteSession
 		};
 
 
