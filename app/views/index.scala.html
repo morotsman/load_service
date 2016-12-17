@@ -12,8 +12,6 @@
 <body ng-controller="loadServiceCtrl">
 
 
-
-
 	<br>
 	<div style="margin-left: 80px; margin-right: 80px" ng-cloak>
 
@@ -53,11 +51,11 @@
 									ng-bind="resource.url"></span>
 							</h3>
 						</div>
-						<div class="col-md-1">
+						<div ng-show="resource.status === 'Active'" class="col-md-1">
 							<button type="button" class="btn btn-info"
 								ng-click="stopSession($index)" style="margin-top: 20px">Stop</button>
 						</div>
-						<div class="col-md-1">
+						<div ng-show="resource.status === 'Inactive'" class="col-md-1">
 							<button type="button" class="btn btn-info"
 								ng-click="startSession($index)" style="margin-top: 20px">Start</button>
 						</div>

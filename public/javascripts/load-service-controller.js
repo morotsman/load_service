@@ -7,8 +7,8 @@ require([ 'angular', './load-service-dao' ], function() {
 	var controllers = angular.module('myApp.load-service-controller',
 			[ 'myApp.load-service-dao' ]);
 
-	controllers.controller('loadServiceCtrl', [ '$scope', 'loadServiceDao','$q',
-			function($scope, loadServiceDao, $q) {
+	controllers.controller('loadServiceCtrl', [ '$scope', 'loadServiceDao','$q','$timeout',
+			function($scope, loadServiceDao, $q, $timeout) {
 				//var websocket = new WebSocket("ws://localhost:9000/ws");
 				//websocket.onmessage = updateStatistics
 
@@ -39,7 +39,8 @@ require([ 'angular', './load-service-dao' ], function() {
 									name: services.data[i],
 									method: details.method,
 									url: details.url,
-									body: details.body,
+									body: details.body,	
+									status: details.status,
 									numberOfRequestPerSecond: details.numberOfRequestPerSecond,
 									maxTimeForRequestInMillis: details.maxTimeForRequestInMillis,
 									currentSide: "flippable_front"
@@ -60,6 +61,7 @@ require([ 'angular', './load-service-dao' ], function() {
 						method: "GET",
 						url: "",
 						body: "",
+						status: "Inactive",
 						numberOfRequestPerSecond: "",
 						currentSide: "flippable_front"
 					});
@@ -70,7 +72,19 @@ require([ 'angular', './load-service-dao' ], function() {
 				}
 				
 				function updateLoadResource(index) {
-					loadServiceDao.updateLoadResource($scope.loadResourceList[index]).then(listLoadResources).then(addResource);
+					var resource = $scope.loadResourceList[index];
+					
+					if(resource.status === 'Active') {
+						loadServiceDao.deleteSession(resource).then(function(){
+							loadServiceDao.updateLoadResource(resource).then(function() {
+								loadServiceDao.createSession(resource).then(listLoadResources);							
+							})
+						})
+					} else {
+						loadServiceDao.updateLoadResource(resource).then(listLoadResources);
+					}
+					
+					
 				}
 				
 				
@@ -92,11 +106,11 @@ require([ 'angular', './load-service-dao' ], function() {
 				}
 				
 				function startSession(index) {
-					loadServiceDao.createSession($scope.loadResourceList[index]);
+					loadServiceDao.createSession($scope.loadResourceList[index]).then(listLoadResources);
 				}
 				
 				function stopSession(index) {
-					loadServiceDao.deleteSession($scope.loadResourceList[index]);
+					loadServiceDao.deleteSession($scope.loadResourceList[index]).then(listLoadResources);
 				}
 				
 

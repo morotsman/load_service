@@ -26,14 +26,13 @@ object LoadManagerActor {
 class LoadManagerActor(val ws: WSClient) extends Actor {
   import LoadManagerActor._
 
-  var ongoingSessions: Map[String, ActorRef] = Map()
 
   var loadResources: Map[String, LoadSpec] = Map()
   
   var index:Integer = 0
   
   def hasSession(name: String): Boolean = 
-    ongoingSessions.get(name).map(s => true).getOrElse(false)
+    loadResources.get(name).map(r => r.status == "Active").getOrElse(false)
   
 
   def receive = {
@@ -41,35 +40,41 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
       if(hasSession(name)) {
         sender ! 403
       } else {
-       val result = loadResources.get(name) match {
+        val result = loadResources.get(name) match {
         case None => 404
-        case Some(s) =>
-          val session = context.actorOf(LoadSessionActor.props(name,s,ws), "load-session-" + name)
-          ongoingSessions += (name -> session)
+        case Some(r) =>
+          val session = context.actorOf(LoadSessionActor.props(name,r,ws), "load-session-" + name)         
+          loadResources = loadResources + (name -> r.copy(status = Some("Active")))
           session ! StartSession
+          println("LoadManagerActor: Session started")
           201
         }
        sender ! result
       }
     case EndLoadSession(name) => 
-      if(hasSession(name)) {
-        
-        ongoingSessions(name) ! EndSession
-        ongoingSessions -= name
-        sender ! 200
-      } else {
-        sender ! 404
-      }
+       val rs = for(
+         r <- loadResources.get(name);  
+         s <- context.child("load-session-" + name)
+       ) yield (r,s) 
+       
+       val result = rs match {
+         case None => 404
+         case Some((r,s)) => 
+           s ! EndSession
+           loadResources = loadResources + (name -> r.copy(status = Some("Inactive")))
+           println("LoadManagerActor: Session stoped")
+           sender ! 200
+       }
     case ListLoadResources =>
       sender ! loadResources.keys
     case CreateLoadReource(loadSpec) =>
-      loadResources = loadResources + ((index+"") -> loadSpec)
+      loadResources = loadResources + ((index+"") -> loadSpec.copy(status = Some("Inactive")))
       index = index + 1
       sender ! loadSpec
     case UpdateLoadResource(name, loadSpec) =>
       loadResources = loadResources + (name -> loadSpec)
       sender ! loadSpec
-    case DeleteLoadResource(name) =>
+    case DeleteLoadResource(name) =>//TODO should also delete session if active
       loadResources = loadResources - name
       sender ! "Ok"
     case GetLoadResource(name) =>
