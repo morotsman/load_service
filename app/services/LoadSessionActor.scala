@@ -35,9 +35,9 @@ class LoadSessionActor(val name: String, val loadSpec: LoadSpec,val ws:WSClient)
       cancellable = context.system.scheduler.schedule(0.millis, 1000.millis,self, SendRequests)
     case SendRequests => 
       for(
-        request <- index to (index + loadSpec.numberOfRequestPerSecond)    
+        request <- index to (index + loadSpec.numberOfRequestPerSecond - 1)    
       ) {loadActor ! SendRequest(request)}
-      index = index + loadSpec.numberOfRequestPerSecond
+      index = index + loadSpec.numberOfRequestPerSecond - 1
     case EndSession => 
       println("LoadSessionActor: Stop Session")
       cancellable.cancel
