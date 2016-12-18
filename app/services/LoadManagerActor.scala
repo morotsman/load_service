@@ -72,8 +72,14 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
       index = index + 1
       sender ! loadSpec
     case UpdateLoadResource(name, loadSpec) =>
-      loadResources = loadResources + (name -> loadSpec)
-      sender ! loadSpec
+      loadResources.get(name) match {
+        case None => 
+          sender ! 404
+        case Some(r) => 
+          var updatedResource = loadSpec.copy(status = r.status)
+          loadResources = loadResources + (name -> updatedResource)
+          sender ! updatedResource
+        }
     case DeleteLoadResource(name) =>
       loadResources = loadResources - name
       context.child("load-session-" + name) match {
