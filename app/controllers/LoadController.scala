@@ -12,6 +12,7 @@ import services.LoadActor
 import services.LoadManagerActor._
 import services.LoadManagerActor
 import model.LoadSpec
+import model.LoadSession
 
 import akka.util.Timeout
 import play.api.libs.json._
@@ -53,14 +54,20 @@ class LoadController @Inject() (actorSystem: ActorSystem,ws: WSClient)(implicit 
   
   def updateLoadResource(name: String) = Action.async(BodyParsers.parse.json) { request =>
     request.body.validate[LoadSpec].map {
-      loadSpec => (loadManagerActor ? UpdateLoadResource(name,loadSpec)).mapTo[LoadSpec].map { msg => Ok(Json.toJson(msg)) }
+      loadSpec => (loadManagerActor ? UpdateLoadResource(name,loadSpec)).mapTo[Option[LoadSpec]].map { 
+        case Some(resource) => Ok(Json.toJson(resource)) 
+        case None => NotFound  
+      }
     }.recoverTotal {
       errors => Future.successful(BadRequest("Bad request: " + JsError.toFlatJson(errors)))
     }
   }
 
 def deleteLoadResource(name: String) = Action.async {
-    (loadManagerActor ? DeleteLoadResource(name)).map(msg => Ok)
+    (loadManagerActor ? DeleteLoadResource(name)).mapTo[Option[LoadSpec]].map { 
+        case Some(resource) => Ok 
+        case None => NotFound  
+      }
   }
 
 def listLoadSessions = Action.async {
@@ -69,12 +76,18 @@ def listLoadSessions = Action.async {
 
 def updateLoadSessions(name: String) = Action.async {
     println("Start load session")
-    (loadManagerActor ? StartLoadSession(name)).map { msg => Ok }
+    (loadManagerActor ? StartLoadSession(name)).mapTo[Option[LoadSession]].map { 
+      case Some(s) => Ok
+      case None => NotFound
+    }
   }
 
 def deleteLoadSessions(name: String) = Action.async {
   println("Stop load session")
-    (loadManagerActor ? EndLoadSession(name)).map { msg => Ok }
+    (loadManagerActor ? EndLoadSession(name)).mapTo[Option[LoadSession]].map { 
+      case Some(s) => Ok
+      case None => NotFound
+    }
   } 
   
 

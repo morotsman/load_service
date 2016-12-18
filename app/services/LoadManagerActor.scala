@@ -6,6 +6,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import akka.util.Timeout
 
 import model.LoadSpec
+import model.LoadSession
 import LoadSessionActor._
 import play.api.libs.ws._
 
@@ -35,16 +36,14 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
   def receive = {
     case StartLoadSession(name) => 
        val result = loadResources.get(name) match {
-        case None => 404
+        case None => None
         case Some(r) =>
           if(r.status.getOrElse("Inactive") == "Inactive") {
-            println(name + " has no session " + loadResources)
             val session = context.actorOf(LoadSessionActor.props(name,r,ws), "load-session-" + name)         
             loadResources = loadResources + (name -> r.copy(status = Some("Active")))
-            session ! StartSession
-            println("LoadManagerActor: Session started")
+            session ! StartSession 
           }
-          200 
+          Some(LoadSession) 
       }
       sender ! result
     case EndLoadSession(name) => 
@@ -53,14 +52,14 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
          s <- context.child("load-session-" + name)
        ) yield (r,s) 
        
-       val result = rs match {
-         case None => 404
+       val result = rs match { 
+         case None => None
          case Some((r,s)) => 
            s ! EndSession
            loadResources = loadResources + (name -> r.copy(status = Some("Inactive")))
-           println("LoadManagerActor: Session stoped")
-           sender ! 200
+           Some(LoadSession)
        }
+       sender ! result
     case ListLoadResources =>
       sender ! loadResources.keys
     case CreateLoadReource(loadSpec) =>
@@ -68,22 +67,27 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
       index = index + 1
       sender ! loadSpec
     case UpdateLoadResource(name, loadSpec) =>
-      loadResources.get(name) match {
-        case None => 
-          sender ! 404
+      val result = loadResources.get(name) match {
+        case None => None
         case Some(r) => 
           var updatedResource = loadSpec.copy(status = r.status)
           loadResources = loadResources + (name -> updatedResource)
-          sender ! updatedResource
+          Some(updatedResource)
         }
+      sender ! result
     case DeleteLoadResource(name) =>
-      loadResources = loadResources - name
-      context.child("load-session-" + name) match {
-        case None => 
-        case Some(a) => 
-          a ! EndSession
+      val result = loadResources.get(name) match {
+        case None => None
+        case Some(r) => 
+          loadResources = loadResources - name
+          context.child("load-session-" + name) match {
+            case None => 
+            case Some(a) => 
+              a ! EndSession
+          }
+          Some(r)
       }
-      sender ! "Ok"
+      sender ! result
     case GetLoadResource(name) =>
       sender ! loadResources.get(name)
 
