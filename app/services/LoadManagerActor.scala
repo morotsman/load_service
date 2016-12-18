@@ -31,26 +31,22 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
   
   var index:Integer = 0
   
-  def hasSession(name: String): Boolean = 
-    loadResources.get(name).map(r => r.status == "Active").getOrElse(false)
-  
 
   def receive = {
     case StartLoadSession(name) => 
-      if(hasSession(name)) {
-        sender ! 403
-      } else {
-        val result = loadResources.get(name) match {
+       val result = loadResources.get(name) match {
         case None => 404
         case Some(r) =>
-          val session = context.actorOf(LoadSessionActor.props(name,r,ws), "load-session-" + name)         
-          loadResources = loadResources + (name -> r.copy(status = Some("Active")))
-          session ! StartSession
-          println("LoadManagerActor: Session started")
-          201
-        }
-       sender ! result
+          if(r.status.getOrElse("Inactive") == "Inactive") {
+            println(name + " has no session " + loadResources)
+            val session = context.actorOf(LoadSessionActor.props(name,r,ws), "load-session-" + name)         
+            loadResources = loadResources + (name -> r.copy(status = Some("Active")))
+            session ! StartSession
+            println("LoadManagerActor: Session started")
+          }
+          200 
       }
+      sender ! result
     case EndLoadSession(name) => 
        val rs = for(
          r <- loadResources.get(name);  
