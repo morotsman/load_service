@@ -12,8 +12,10 @@ import model.LoadSpec
 import play.api.libs.ws._
 import play.api.http.HttpEntity
 
+import services.StatisticsActor._
+
 object LoadActor {
-  def props(ws: WSClient, loadSpec: LoadSpec) = Props[LoadActor](new LoadActor(ws,loadSpec))
+  def props(ws: WSClient, loadSpec: LoadSpec) = Props[LoadActor](new LoadActor(ws, loadSpec))
 
   case class SendRequest(request: Int)
 }
@@ -26,9 +28,27 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
       val request: WSRequest = ws.url(loadSpec.url)
       val complexRequest: WSRequest =
         request.withHeaders("Accept" -> "application/json")
-          .withRequestTimeout(10000.millis)
+          .withRequestTimeout(loadSpec.maxTimeForRequestInMillis.millis)
           .withQueryString("search" -> "play")
-      complexRequest.get()
+      val futureResult: Future[WSResponse] = if (loadSpec.method == "GET") {
+        complexRequest.get()
+      } else if (loadSpec.method == "PUT") {
+        complexRequest.put(loadSpec.body)
+      } else if (loadSpec.method == "POST") {
+        complexRequest.post(loadSpec.body)
+      } else {
+        complexRequest.delete
+      }
+      
+      futureResult.recover({
+        case e => 
+          context.system.eventStream.publish(FailedRequest(loadSpec, e))
+      })
+      
+      futureResult.map(x => SuccessfulRequest(loadSpec)).foreach ( r => 
+        context.system.eventStream.publish(r) 
+      )
+
     case _ =>
       println("Handle error")
   }

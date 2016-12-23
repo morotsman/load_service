@@ -10,6 +10,8 @@ import model.LoadSession
 import LoadSessionActor._
 import play.api.libs.ws._
 
+import services.StatisticsActor._
+
 object LoadManagerActor {
   def props(ws:WSClient) = Props[LoadManagerActor](new LoadManagerActor(ws))
 
@@ -65,6 +67,7 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
     case CreateLoadReource(loadSpec) =>
       loadResources = loadResources + ((index+"") -> loadSpec.copy(status = Some("Inactive")))
       index = index + 1
+      context.system.eventStream.publish(LoadResourceCreated(loadSpec)) 
       sender ! loadSpec
     case UpdateLoadResource(name, loadSpec) =>
       val result = loadResources.get(name) match {
@@ -87,6 +90,11 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
           }
           Some(r)
       }
+      
+      result.foreach { x =>  
+        context.system.eventStream.publish(LoadResourceDeleted(x))
+      }
+      
       sender ! result
     case GetLoadResource(name) =>
       sender ! loadResources.get(name)
