@@ -13,17 +13,17 @@ import play.api.libs.ws._
 import play.api.http.HttpEntity
 
 object LoadActor {
-  def props(ws: WSClient, url: String) = Props[LoadActor](new LoadActor(ws,url))
+  def props(ws: WSClient, loadSpec: LoadSpec) = Props[LoadActor](new LoadActor(ws,loadSpec))
 
   case class SendRequest(request: Int)
 }
 
-class LoadActor(val ws: WSClient, val url: String) extends Actor {
+class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
   import LoadActor._
 
   def receive = {
     case SendRequest(id) =>
-      val request: WSRequest = ws.url(url)
+      val request: WSRequest = ws.url(loadSpec.url)
       val complexRequest: WSRequest =
         request.withHeaders("Accept" -> "application/json")
           .withRequestTimeout(10000.millis)
