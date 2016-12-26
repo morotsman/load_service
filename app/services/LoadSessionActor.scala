@@ -36,7 +36,7 @@ class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClien
     case StartSession =>
       println("LoadSessionActor: Start Session: " + loadSpec)
 
-      val numberOfSlots: Int = loadSpec.numberOfRequestPerSecond
+      val numberOfSlots = 2
       
       cancellables = numberOfRequestPerSlot(numberOfSlots, loadSpec.numberOfRequestPerSecond).map(numberOfRequests => {
         val index = numberOfRequests._2
