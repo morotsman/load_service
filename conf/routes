@@ -23,3 +23,5 @@ GET    /load-session				controllers.LoadController.listLoadSessions
 PUT    /load-session/:name			controllers.LoadController.updateLoadSessions(name)
 
 DELETE /load-session/:name			controllers.LoadController.deleteLoadSessions(name)
+
+GET     /ws                         controllers.StatisticsController.ws

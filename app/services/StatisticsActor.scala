@@ -6,6 +6,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import akka.util.Timeout
 import model._
 
+
+
 object StatisticsActor {
   def props = Props[StatisticsActor]
   
@@ -15,6 +17,11 @@ object StatisticsActor {
   
   case class LoadResourceCreated(loadSpec:LoadSpec)
   case class LoadResourceDeleted(loadSpec:LoadSpec)
+  
+  case class WatchStatistics()
+  case class UnWatchStatistics()
+  
+  case class StatisticsEvent(loadResource: ResourceKey, numberOfRequests: Int, eventType: String)
 }
 
 class StatisticsActor extends Actor{
@@ -22,12 +29,11 @@ class StatisticsActor extends Actor{
   
   val tmp = (1,2)
   
-  type Method = String
-  type Url = String
-  case class ResourceKey(method: Method,url: Url)
+
   
   var successfulRequestsLastSecond : scala.collection.mutable.Map[ResourceKey, Int] = scala.collection.mutable.Map()
   var failedRequestsLastSecond : scala.collection.mutable.Map[ResourceKey, List[String]] = scala.collection.mutable.Map()
+  var observers: Set[ActorRef] = Set()
   
   override def preStart(): Unit = {
     context.system.scheduler.scheduleOnce(1000.millis,self, AgggregateStatistcs) 
@@ -64,18 +70,27 @@ class StatisticsActor extends Actor{
       failedRequestsLastSecond = failedRequestsLastSecond - getKey(l)
     case AgggregateStatistcs => 
       context.system.scheduler.scheduleOnce(1000.millis,self, AgggregateStatistcs)
-      successfulRequestsLastSecond.foreach(r => 
-        println("Successful: " + r._1.method + " " + r._1.url + ": " + r._2)  
-      )
-      failedRequestsLastSecond.foreach(r => 
-        if(r._2.size > 0){
-          println("Failed: " + r._1.method + " " + r._1.url + ": " + aggregateFailure(r._2))  
-        }
-        
-      )
+      observers.foreach { out =>   
+        successfulRequestsLastSecond.foreach(s =>
+            out ! StatisticsEvent(s._1, s._2, "successful") 
+        ) 
+        failedRequestsLastSecond.foreach(s => {
+          out ! StatisticsEvent(s._1, s._2.size, "failed")
+          val aggregatedFailures = aggregateFailure(s._2)
+          aggregatedFailures.foreach(e => {
+            out ! StatisticsEvent(s._1, e._2, e._1) 
+          })   
+        }) 
+      }
       
       successfulRequestsLastSecond = successfulRequestsLastSecond.map( v => (v._1 -> 0))
       failedRequestsLastSecond = failedRequestsLastSecond.map( v => (v._1,Nil))
+    case WatchStatistics => 
+      println("StatisticsActor: Watch statistics")
+      observers = observers + sender()
+    case UnWatchStatistics => 
+      println("StatisticsActor: Unwatch statistics")
+      observers = observers - sender
     case u => 
       println("StatisticsActor received unknown message: " + u)
   }

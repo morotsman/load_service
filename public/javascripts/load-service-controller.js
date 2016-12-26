@@ -9,8 +9,8 @@ require([ 'angular', './load-service-dao' ], function() {
 
 	controllers.controller('loadServiceCtrl', [ '$scope', 'loadServiceDao','$q','$timeout',
 			function($scope, loadServiceDao, $q, $timeout) {
-				//var websocket = new WebSocket("ws://localhost:9000/ws");
-				//websocket.onmessage = updateStatistics
+				var websocket = new WebSocket("ws://localhost:9001/ws");
+				websocket.onmessage = updateStatistics
 
 				$scope.newLoadResource = newLoadResource; 
 				$scope.createLoadResource = createLoadResource;
@@ -20,6 +20,7 @@ require([ 'angular', './load-service-dao' ], function() {
 				$scope.stopSession = stopSession;
 				$scope.loadResourceList = [];
 				$scope.showInfo = showInfo;
+				$scope.getId = getId;
 		
 				activate();
 				
@@ -125,15 +126,15 @@ require([ 'angular', './load-service-dao' ], function() {
 				
 				var plotData = {};
 				
-				function updatePlot(method, path, numberOfRequests, eventType) {
+				function updatePlot(resource, numberOfRequests, eventType) {
 					
-					var data = getHistoricData(eventType, method, path);
+					var data = getHistoricData(eventType, resource);
 					if(data.length > 1000) {
 						data.shift();
 					}
 					data.push([data.length, numberOfRequests]);
 					
-					var plot = $("#" + eventType + method + path).data("plot");
+					var plot = $("#" + getId(eventType,resource)).data("plot");
 					if(plot) {
 						plot.setData([data])
 						plot.setupGrid()
@@ -143,46 +144,48 @@ require([ 'angular', './load-service-dao' ], function() {
 				}
 				
 				function updateStatistics(msg) {
+					console.log(msg.data);
 					var data = JSON.parse(msg.data);
-					var method = data.resource.method;
-					var path = data.resource.path;
 					var eventType = data.eventType
-					var numberOfRequests = data.numberOfRequestsPerSecond;
+					var numberOfRequests = data.numberOfRequestsPerSecond;		
+					updatePlot(data.resource, numberOfRequests,eventType);
+				}
+				
+				
+				
+				
+				function getHistoricData(eventType, resource) {	
+					return plotData[getId(eventType,resource)];
+				}
+				
+				function getId(type, resource) {
+					return type + resource.method + resource.url.replace(/\//g, "").replace(/:/g, "");
+				}
+				
+				function watchStatistics(resource) {
 					
-					updatePlot(method, path, numberOfRequests,eventType);
-				}
-				
-				
-				
-				
-				function getHistoricData(eventType, method, path) {	
-					return plotData[eventType + method + path];
-				}
-				
-				function watchStatistics(mock) {
-					/*
-					websocket.send(JSON.stringify({action:"watch", resource: {method: mock.method, path: mock.path}}));
-					if(!plotData["incoming" + mock.method + mock.path]) {
-						plotData["incoming" + mock.method + mock.path] = [];
-						plotData["completed" + mock.method + mock.path] = [];
+					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url}}));
+					if(!plotData[getId("successful",resource)]) {
+						plotData[getId("successful",resource)] = [];
+						plotData[getId("failed",resource)] = [];
 					}
-					var incoming = getHistoricData("incoming", mock.method, mock.path);
-					var completed = getHistoricData("completed", mock.method, mock.path);
+					var successful = getHistoricData("successful", resource);
+					var failed = getHistoricData("failed", resource);
 					
-					var incomingDataset = [
-					               { label: "Incoming requests", data: incoming, points: { symbol: "triangle"} }
+					var successfulDataset = [
+					               { label: "Successful requests", data: successful, points: { symbol: "triangle"} }
 					           ];
-					var completedDataset = [
-							               { label: "Completed requests", data: completed, points: { symbol: "triangle"} }
+					var failedDataset = [
+							               { label: "Failed requests", data: failed, points: { symbol: "triangle"} }
 							           ];
 					var chartOptions = getChartOptions();
-					$('#completed' + mock.method + mock.path).plot(completedDataset, chartOptions).data("plot");
-					$('#incoming' + mock.method + mock.path).plot(incomingDataset, chartOptions).data("plot")
-					*/
+					$("#" + getId('successful', resource)).plot(successfulDataset, chartOptions).data("plot");
+					$("#" + getId('failed', resource)).plot(failedDataset, chartOptions).data("plot")
+					
 				}
 				
-				function unWatchStatistics(mock) {
-					//websocket.send(JSON.stringify({action:"unWatch", resource: {method: mock.method, path: mock.path}}));
+				function unWatchStatistics(resource) {
+					websocket.send(JSON.stringify({action:"unWatch", resource: {method: resource.method, url: resource.url}}));
 				}
 
 				function showInfo(index) {

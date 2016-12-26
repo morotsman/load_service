@@ -7,5 +7,7 @@ class Module extends AbstractModule with AkkaGuiceSupport {
 
   override def configure(): Unit = {
     bindActor[StatisticsActor]("statisticsActor")
+    bindActor[UserParentActor]("userParentActor")
+    bindActorFactory[UserActor, UserActor.Factory]
   }
 }

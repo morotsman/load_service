@@ -112,20 +112,20 @@
 
 						<div class="container">
 							<div class="col-md-6">
-								<h4 class="text-center">Incoming Requests</h4>
+								<h4 class="text-center">Successful Requests</h4>
 								<div id="statistics" class="big-chart">
 									<div class="chart-holder">
 										<div class="chart"
-											id="{{'incoming' + resource.method + resource.path}}"></div>
+											id="{{getId('successful', resource)}}"></div>
 									</div>
 								</div>
 							</div>
 							<div class="col-md-6">
-								<h4 class="text-center">Outgoing Requests</h4>
+								<h4 class="text-center">Failed Requests</h4>
 								<div id="statistics" class="big-chart">
 									<div class="chart-holder">
 										<div class="chart"
-											id="{{'completed' + resource.method + resource.path}}"></div>
+											id="{{getId('failed', resource)}}"></div>
 									</div>
 								</div>
 							</div>
