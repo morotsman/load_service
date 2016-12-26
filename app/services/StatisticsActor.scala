@@ -27,7 +27,7 @@ class StatisticsActor extends Actor{
   case class ResourceKey(method: Method,url: Url)
   
   var successfulRequestsLastSecond : scala.collection.mutable.Map[ResourceKey, Int] = scala.collection.mutable.Map()
-  var failedRequestsLastSecond : scala.collection.mutable.Map[ResourceKey, Int] = scala.collection.mutable.Map()
+  var failedRequestsLastSecond : scala.collection.mutable.Map[ResourceKey, List[String]] = scala.collection.mutable.Map()
   
   override def preStart(): Unit = {
     context.system.scheduler.scheduleOnce(1000.millis,self, AgggregateStatistcs) 
@@ -47,15 +47,18 @@ class StatisticsActor extends Actor{
   
   def getKey(loadSpec: LoadSpec): ResourceKey = ResourceKey(loadSpec.method, loadSpec.url)
   
+  def aggregateFailure(errors : List[String]): Map[String, Int] =
+    errors.groupBy(e => e).map(ge => (ge._1, ge._2.size))  
+    
+  
   def receive = { 
     case FailedRequest(l,e) => 
-      //println(e)
-      failedRequestsLastSecond(getKey(l)) = failedRequestsLastSecond(getKey(l)) + 1
+      failedRequestsLastSecond(getKey(l)) = e.getClass.toString :: failedRequestsLastSecond(getKey(l))
     case SuccessfulRequest(l) =>
       successfulRequestsLastSecond(getKey(l)) = successfulRequestsLastSecond(getKey(l)) + 1
     case LoadResourceCreated(l) => 
       successfulRequestsLastSecond = successfulRequestsLastSecond + (getKey(l) -> 0)
-      failedRequestsLastSecond = failedRequestsLastSecond + (getKey(l) -> 0)
+      failedRequestsLastSecond = failedRequestsLastSecond + (getKey(l) -> Nil)
     case LoadResourceDeleted(l) => 
       successfulRequestsLastSecond = successfulRequestsLastSecond - getKey(l)
       failedRequestsLastSecond = failedRequestsLastSecond - getKey(l)
@@ -65,11 +68,14 @@ class StatisticsActor extends Actor{
         println("Successful: " + r._1.method + " " + r._1.url + ": " + r._2)  
       )
       failedRequestsLastSecond.foreach(r => 
-        println("Failed: " + r._1.method + " " + r._1.url + ": " + r._2)  
+        if(r._2.size > 0){
+          println("Failed: " + r._1.method + " " + r._1.url + ": " + aggregateFailure(r._2))  
+        }
+        
       )
       
       successfulRequestsLastSecond = successfulRequestsLastSecond.map( v => (v._1 -> 0))
-      failedRequestsLastSecond = failedRequestsLastSecond.map( v => (v._1 -> 0))
+      failedRequestsLastSecond = failedRequestsLastSecond.map( v => (v._1,Nil))
     case u => 
       println("StatisticsActor received unknown message: " + u)
   }
