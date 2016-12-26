@@ -17,7 +17,6 @@ import play.api.mvc._
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-import services.StatisticsActor.UnWatchStatistics
 import services.UserParentActor
 
 /**

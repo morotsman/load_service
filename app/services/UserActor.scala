@@ -8,25 +8,22 @@ import com.google.inject.assistedinject.Assisted
 import play.api.Configuration
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.libs.json._
-import services.StatisticsActor.UnWatchStatistics
-import services.StatisticsActor.WatchStatistics
 import services.StatisticsActor.StatisticsEvent
 
 import model.ResourceKey
 
 class UserActor @Inject()(@Assisted out: ActorRef,
-                          @Named("statisticsActor") statisticsActor: ActorRef,
                           configuration: Configuration) extends Actor with ActorLogging {
 
 
   override def preStart(): Unit = {
     super.preStart()
-    statisticsActor ! WatchStatistics
+    context.system.eventStream.subscribe(context.self, classOf[StatisticsEvent])
   }
   
   override def postStop(): Unit = {
     super.preStart()
-    statisticsActor ! UnWatchStatistics
+    context.system.eventStream.unsubscribe(context.self) 
   }
 
   var observedMocks : Set[ResourceKey]= Set() 
@@ -43,7 +40,6 @@ class UserActor @Inject()(@Assisted out: ActorRef,
         observedMocks = observedMocks - resource
       }      
     case event@StatisticsEvent(resource,numberOfRequests, eventType) =>
-      println(event)
       if(observedMocks.contains(resource)) {
          val statisticsEvent = Json.obj("type" -> "statisticsEvent", "resource" -> resource, "numberOfRequestsPerSecond" -> numberOfRequests, "eventType" -> eventType)
          out ! statisticsEvent
