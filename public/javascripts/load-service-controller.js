@@ -124,40 +124,84 @@ require([ 'angular', './load-service-dao' ], function() {
 					}
 				}	
 				
+				function latancyFormatter(v, axis) {
+					return v.toFixed(axis.tickDecimals) + "ms";
+				}
+				
 				function getSucessfulChartOptions () {
 					return {
 						series: {shadowSize: 0},
-						  xaxis: {
-							  show: false
-						  }				    
+						xaxis: {
+							show: false
+						},
+						legend: { position: "se"},
+						yaxes: [ { min: 0 }, {
+							min:0,
+							alignTicksWithAxis: 1,
+							position: 1,
+							tickFormatter: latancyFormatter
+						}]
 					}
 				}
 				
 				var plotData = {};
 				
-				function updatePlot(resource, numberOfRequests, eventType) {
+				
+				
+				function updateSuccessfulPlot(resource, numberOfRequests, latancy) {				
+					var numbers = getHistoricData("successful", resource);
+					if(numbers.length > 100) {
+						numbers.shift();
+					}
+					numbers.push([numbers.length, numberOfRequests]);
 					
-					var data = getHistoricData(eventType, resource);
-					if(data.length > 1000) {
+					
+					var latancies = getHistoricData("latancy", resource);
+					if(latancies.length > 100) {
+						latancies.shift();
+					}
+					latancies.push([latancies.length, latancy]);
+					
+					var successfulDataset = [
+					                         { label: "Req/s", data: numbers, points: { symbol: "triangle"}},
+								             { label: "Lat", data: latancies, points: { symbol: "triangle"}, yaxis:2}
+								           ];
+					
+					var plot = $("#" + getId("successful",resource)).data("plot");
+					if(plot) {
+						plot.setData(successfulDataset)
+						plot.setupGrid()
+						plot.draw()
+					}					
+				}
+				
+				function updateFailedPlot(resource, numberOfRequests) {
+					var data = getHistoricData("failed", resource);
+					if(data.length > 100) {
 						data.shift();
 					}
 					data.push([data.length, numberOfRequests]);
 					
-					var plot = $("#" + getId(eventType,resource)).data("plot");
+					var plot = $("#" + getId("failed", resource)).data("plot");
 					if(plot) {
 						plot.setData([data])
 						plot.setupGrid()
 						plot.draw()
-					}
-					
+					}	
 				}
 				
 				function updateStatistics(msg) {
 					console.log(msg.data);
 					var data = JSON.parse(msg.data);
 					var eventType = data.eventType
-					var numberOfRequests = data.numberOfRequestsPerSecond;		
-					updatePlot(data.resource, numberOfRequests,eventType);
+					var numberOfRequests = data.numberOfRequestsPerSecond;
+					var latancy = data.avargeLatancyInMillis;
+					if(eventType === "successful") {
+						updateSuccessfulPlot(data.resource, numberOfRequests, latancy);
+					} else if(eventType === "failed") {
+						updateFailedPlot(data.resource, numberOfRequests);
+					}
+					
 				}
 				
 				
@@ -176,13 +220,16 @@ require([ 'angular', './load-service-dao' ], function() {
 					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url}}));
 					if(!plotData[getId("successful",resource)]) {
 						plotData[getId("successful",resource)] = [];
+						plotData[getId("latancy",resource)] = [];
 						plotData[getId("failed",resource)] = [];
 					}
 					var successful = getHistoricData("successful", resource);
 					var failed = getHistoricData("failed", resource);
+					var latancy = getHistoricData("latancy", resource);
 					
 					var successfulDataset = [
-					               { label: "Successful requests", data: successful, points: { symbol: "triangle"} }
+					               { label: "Req/s", data: successful, points: { symbol: "triangle"}},
+					               { label: "Lat", data: latancy, points: { symbol: "triangle"}, yaxis:2}
 					           ];
 					var failedDataset = [
 							               { label: "Failed requests", data: failed, points: { symbol: "triangle"} }
