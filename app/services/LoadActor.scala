@@ -25,6 +25,7 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
 
   def receive = {
     case SendRequest(id) =>
+      val startTime = System.currentTimeMillis
       val request: WSRequest = ws.url(loadSpec.url)
       val complexRequest: WSRequest =
         request.withHeaders("Accept" -> "application/json")
@@ -42,12 +43,13 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
       
       futureResult.recover({
         case e => 
-          context.system.eventStream.publish(FailedRequest(loadSpec, e))
+          context.system.eventStream.publish(FailedRequest(loadSpec, e, System.currentTimeMillis - startTime))
       })
       
-      futureResult.map(x => SuccessfulRequest(loadSpec)).foreach ( r => 
+      futureResult.map(x => SuccessfulRequest(loadSpec, System.currentTimeMillis - startTime)).foreach ( r => {
+        val stopTime = System.currentTimeMillis
         context.system.eventStream.publish(r) 
-      )
+      })
 
     case _ =>
       println("Handle error")

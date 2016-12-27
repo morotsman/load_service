@@ -115,7 +115,7 @@ require([ 'angular', './load-service-dao' ], function() {
 				}
 				
 
-				function getChartOptions () {
+				function getFailedChartOptions () {
 					return {
 						series: {shadowSize: 0},
 						  xaxis: {
@@ -123,6 +123,15 @@ require([ 'angular', './load-service-dao' ], function() {
 						  }				    
 					}
 				}	
+				
+				function getSucessfulChartOptions () {
+					return {
+						series: {shadowSize: 0},
+						  xaxis: {
+							  show: false
+						  }				    
+					}
+				}
 				
 				var plotData = {};
 				
@@ -178,9 +187,9 @@ require([ 'angular', './load-service-dao' ], function() {
 					var failedDataset = [
 							               { label: "Failed requests", data: failed, points: { symbol: "triangle"} }
 							           ];
-					var chartOptions = getChartOptions();
-					$("#" + getId('successful', resource)).plot(successfulDataset, chartOptions).data("plot");
-					$("#" + getId('failed', resource)).plot(failedDataset, chartOptions).data("plot")
+					
+					$("#" + getId('successful', resource)).plot(successfulDataset, getSucessfulChartOptions()).data("plot");
+					$("#" + getId('failed', resource)).plot(failedDataset, getFailedChartOptions()).data("plot")
 					
 				}
 				
