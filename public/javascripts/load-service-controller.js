@@ -9,7 +9,7 @@ require([ 'angular', './load-service-dao' ], function() {
 
 	controllers.controller('loadServiceCtrl', [ '$scope', 'loadServiceDao','$q','$timeout',
 			function($scope, loadServiceDao, $q, $timeout) {
-				var maxNumberOfStatistics = 20;
+				var maxNumberOfStatistics = 100;
 		
 				var websocket = new WebSocket("ws://localhost:9001/ws");
 				websocket.onmessage = updateStatistics
@@ -121,15 +121,13 @@ require([ 'angular', './load-service-dao' ], function() {
 				function getFailedChartOptions () {
 					return {
 						series: {shadowSize: 0},
-						  xaxis: {
-							  show: false
-						  }				    
+						xaxis: {
+							show: false
+						},	
+						legend: { position: "se"}
 					}
-				}	
+				}		
 				
-				function latancyFormatter(v, axis) {
-					return v.toFixed(axis.tickDecimals) + "ms";
-				}
 				
 				function getSucessfulChartOptions () {
 					return {
@@ -142,7 +140,9 @@ require([ 'angular', './load-service-dao' ], function() {
 							min:0,
 							alignTicksWithAxis: 1,
 							position: 1,
-							tickFormatter: latancyFormatter
+							tickFormatter: function (v, axis) {
+								return v.toFixed(axis.tickDecimals) + "ms";
+							}
 						}]
 					}
 				}
@@ -169,7 +169,7 @@ require([ 'angular', './load-service-dao' ], function() {
 					
 					var successfulDataset = [
 					                         { label: "Req/s", data: numbers, points: { symbol: "triangle"}},
-								             { label: "Lat", data: latancies, points: { symbol: "triangle"}, yaxis:2}
+								             { label: "Latancy", data: latancies, points: { symbol: "triangle"}, yaxis:2}
 								           ];
 					
 					var plot = $("#" + getId("successful",resource)).data("plot");
@@ -183,9 +183,13 @@ require([ 'angular', './load-service-dao' ], function() {
 				function updateFailedPlot(resource, numberOfRequests) {
 					var failed = getPlotData(resource, "failed", numberOfRequests);
 					
+					var failedDataset = [
+							               { label: "Req/s", data: failed, points: { symbol: "triangle"} }
+							           ];
+					
 					var plot = $("#" + getId("failed", resource)).data("plot");
 					if(plot) {
-						plot.setData([failed])
+						plot.setData(failedDataset)
 						plot.setupGrid()
 						plot.draw()
 					}	
@@ -229,10 +233,10 @@ require([ 'angular', './load-service-dao' ], function() {
 					
 					var successfulDataset = [
 					               { label: "Req/s", data: successful, points: { symbol: "triangle"}},
-					               { label: "Lat", data: latancy, points: { symbol: "triangle"}, yaxis:2}
+					               { label: "Latancy", data: latancy, points: { symbol: "triangle"}, yaxis:2}
 					           ];
 					var failedDataset = [
-							               { label: "Failed requests", data: failed, points: { symbol: "triangle"} }
+							               { label: "Req/s", data: failed, points: { symbol: "triangle"} }
 							           ];
 					
 					$("#" + getId('successful', resource)).plot(successfulDataset, getSucessfulChartOptions()).data("plot");
