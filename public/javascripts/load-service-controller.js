@@ -9,6 +9,8 @@ require([ 'angular', './load-service-dao' ], function() {
 
 	controllers.controller('loadServiceCtrl', [ '$scope', 'loadServiceDao','$q','$timeout',
 			function($scope, loadServiceDao, $q, $timeout) {
+				var maxNumberOfStatistics = 20;
+		
 				var websocket = new WebSocket("ws://localhost:9001/ws");
 				websocket.onmessage = updateStatistics
 
@@ -145,22 +147,24 @@ require([ 'angular', './load-service-dao' ], function() {
 				}
 				
 				var plotData = {};
+			
 				
 				
-				
-				function updateSuccessfulPlot(resource, numberOfRequests, latancy) {				
-					var numbers = getHistoricData("successful", resource);
-					if(numbers.length > 100) {
-						numbers.shift();
+				function getPlotData(resource, type, data) {		
+					var result = getHistoricData(type, resource);
+					if(result.length > maxNumberOfStatistics) {
+						result.shift();
 					}
-					numbers.push([numbers.length, numberOfRequests]);
 					
+					var nextIndex = result[result.length-1]?(result[result.length-1][0] + 1):0; 
 					
-					var latancies = getHistoricData("latancy", resource);
-					if(latancies.length > 100) {
-						latancies.shift();
-					}
-					latancies.push([latancies.length, latancy]);
+					result.push([nextIndex,data]);
+					return result;
+				}
+				
+				function updateSuccessfulPlot(resource, numberOfRequests, latancy) {
+					var numbers = getPlotData(resource, "successful", numberOfRequests);
+					var latancies = getPlotData(resource, "latancy", latancy);		
 					
 					var successfulDataset = [
 					                         { label: "Req/s", data: numbers, points: { symbol: "triangle"}},
@@ -176,22 +180,17 @@ require([ 'angular', './load-service-dao' ], function() {
 				}
 				
 				function updateFailedPlot(resource, numberOfRequests) {
-					var data = getHistoricData("failed", resource);
-					if(data.length > 100) {
-						data.shift();
-					}
-					data.push([data.length, numberOfRequests]);
+					var failed = getPlotData(resource, "failed", numberOfRequests);
 					
 					var plot = $("#" + getId("failed", resource)).data("plot");
 					if(plot) {
-						plot.setData([data])
+						plot.setData([failed])
 						plot.setupGrid()
 						plot.draw()
 					}	
 				}
 				
 				function updateStatistics(msg) {
-					console.log(msg.data);
 					var data = JSON.parse(msg.data);
 					var eventType = data.eventType
 					var numberOfRequests = data.numberOfRequestsPerSecond;
