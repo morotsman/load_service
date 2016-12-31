@@ -117,36 +117,6 @@ require([ 'angular', './load-service-dao' ], function() {
 					loadServiceDao.deleteSession($scope.loadResourceList[index]).then(listLoadResources);
 				}
 				
-
-				function getFailedChartOptions () {
-					return {
-						series: {shadowSize: 0},
-						xaxis: {
-							show: false
-						},	
-						legend: { position: "se"}
-					}
-				}		
-				
-				
-				function getSucessfulChartOptions () {
-					return {
-						series: {shadowSize: 0},
-						xaxis: {
-							show: false
-						},
-						legend: { position: "se"},
-						yaxes: [ { min: 0 }, {
-							min:0,
-							alignTicksWithAxis: 1,
-							position: 1,
-							tickFormatter: function (v, axis) {
-								return v.toFixed(axis.tickDecimals) + "ms";
-							}
-						}]
-					}
-				}
-				
 				var plotData = {};
 			
 				
@@ -168,8 +138,8 @@ require([ 'angular', './load-service-dao' ], function() {
 					var latancies = getPlotData(resource, "latancy", latancy);		
 					
 					var successfulDataset = [
-					                         { label: "Req/s", data: numbers, points: { symbol: "triangle"}},
-								             { label: "Latancy", data: latancies, points: { symbol: "triangle"}, yaxis:2}
+					                         { label: "Req/s", data: numbers},
+								             { label: "Latancy", data: latancies, yaxis:2}
 								           ];
 					
 					var plot = $("#" + getId("successful",resource)).data("plot");
@@ -184,7 +154,7 @@ require([ 'angular', './load-service-dao' ], function() {
 					var failed = getPlotData(resource, "failed", numberOfRequests);
 					
 					var failedDataset = [
-							               { label: "Req/s", data: failed, points: { symbol: "triangle"} }
+							               { label: "Req/s", data: failed }
 							           ];
 					
 					var plot = $("#" + getId("failed", resource)).data("plot");
@@ -206,10 +176,7 @@ require([ 'angular', './load-service-dao' ], function() {
 						updateFailedPlot(data.resource, numberOfRequests);
 					}
 					
-				}
-				
-				
-				
+				}	
 				
 				function getHistoricData(eventType, resource) {	
 					return plotData[getId(eventType,resource)];
@@ -220,27 +187,53 @@ require([ 'angular', './load-service-dao' ], function() {
 				}
 				
 				function watchStatistics(resource) {
+					var failedChartOptions = {
+							series: {shadowSize: 0},
+							xaxis: {
+								show: false
+							},	
+							legend: { position: "se"}
+						}
+					
+					var sucessfulChartOptions = {
+							series: {shadowSize: 0},
+							xaxis: {
+								show: false
+							},
+							legend: { position: "se"},
+							yaxes: [ { min: 0 }, {
+								min:0,
+								alignTicksWithAxis: 1,
+								position: 1,
+								tickFormatter: function (v, axis) {
+									return v.toFixed(axis.tickDecimals) + "ms";
+								}
+							}]
+						};
+					
 					
 					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url}}));
+					
 					if(!plotData[getId("successful",resource)]) {
 						plotData[getId("successful",resource)] = [];
 						plotData[getId("latancy",resource)] = [];
 						plotData[getId("failed",resource)] = [];
 					}
+					
 					var successful = getHistoricData("successful", resource);
 					var failed = getHistoricData("failed", resource);
 					var latancy = getHistoricData("latancy", resource);
 					
 					var successfulDataset = [
-					               { label: "Req/s", data: successful, points: { symbol: "triangle"}},
-					               { label: "Latancy", data: latancy, points: { symbol: "triangle"}, yaxis:2}
+					               { label: "Req/s", data: successful},
+					               { label: "Latancy", data: latancy, yaxis:2}
 					           ];
 					var failedDataset = [
 							               { label: "Req/s", data: failed, points: { symbol: "triangle"} }
 							           ];
 					
-					$("#" + getId('successful', resource)).plot(successfulDataset, getSucessfulChartOptions()).data("plot");
-					$("#" + getId('failed', resource)).plot(failedDataset, getFailedChartOptions()).data("plot")
+					$("#" + getId('successful', resource)).plot(successfulDataset, sucessfulChartOptions).data("plot");
+					$("#" + getId('failed', resource)).plot(failedDataset, failedChartOptions).data("plot")
 					
 				}
 				
