@@ -104,8 +104,9 @@ require([ 'angular', './load-service-dao' ], function() {
 						addResource();
 					}
 					$scope.loadResourceList.splice(index,1);
-					delete plotData["incoming" + resourceToDelete.method + resourceToDelete.path];
-					delete plotData["completed" + resourceToDelete.method + resourceToDelete.path];
+					delete plotData[getId("successful",resourceToDelete)];
+					delete plotData[getId("failed",resourceToDelete)];
+					delete plotData[getId("latancy",resourceToDelete)];			
 				}
 				
 				function startSession(index) {
