@@ -35,8 +35,10 @@ class UserActor @Inject()(@Assisted out: ActorRef,
       val action = (json \ "action").as[String]
       val resource = (json \ "resource").as[ResourceKey]
       if(action == "watch") {
+        println("UserActor: watch");
         observedMocks = observedMocks + resource
       } else if(action == "unWatch"){
+        println("UserActor: unwatch");
         observedMocks = observedMocks - resource
       }      
     case event@StatisticsEvent(resource,numberOfRequests, eventType, t) =>

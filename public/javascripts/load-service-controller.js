@@ -29,6 +29,22 @@ require([ 'angular', './load-service-dao' ], function() {
 				function activate() {
 					listLoadResources();
 				}
+				
+				function getCurrentSide(name) {
+					var current = $scope.loadResourceList.find(function(r) {
+						return r.name === name;
+					});
+					if(current) {
+						return current.currentSide;
+					} else {
+						return "flippable_front";
+					}
+					
+				}
+				
+				function backDisplayed(r) {
+					return r.currentSide === "flippable_back";
+				}
  
 				function listLoadResources (){
 					loadServiceDao.getLoadResources().then(function(services) {
@@ -46,10 +62,13 @@ require([ 'angular', './load-service-dao' ], function() {
 									status: details.status,
 									numberOfRequestPerSecond: details.numberOfRequestPerSecond,
 									maxTimeForRequestInMillis: details.maxTimeForRequestInMillis,
-									currentSide: "flippable_front"
+									currentSide: getCurrentSide(services.data[i])
 								})
 							}
 							$scope.loadResourceList = result;
+							$timeout(function(){
+								$scope.loadResourceList.filter(backDisplayed).forEach(watchStatistics);
+							},1);
 							
 						
 						});
@@ -80,7 +99,7 @@ require([ 'angular', './load-service-dao' ], function() {
 					if(resource.status === 'Active') {
 						loadServiceDao.deleteSession(resource).then(function(){
 							loadServiceDao.updateLoadResource(resource).then(function() {
-								loadServiceDao.createSession(resource).then(listLoadResources);							
+								loadServiceDao.createSession(resource).then(listLoadResources);						
 							})
 						})
 					} else {
