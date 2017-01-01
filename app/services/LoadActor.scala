@@ -23,6 +23,13 @@ object LoadActor {
 class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
   import LoadActor._
 
+  var actorStoped = false;
+  
+  override def postStop: Unit = {
+    println("LoadActor stopped")
+    actorStoped = true
+  }
+  
   def receive = {
     case SendRequest(id) =>
       val startTime = System.currentTimeMillis
@@ -40,16 +47,19 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
       } else {
         complexRequest.delete
       }
-      
+
       futureResult.recover({
-        case e => 
+        case e =>
           context.system.eventStream.publish(FailedRequest(loadSpec, e, System.currentTimeMillis - startTime))
       })
+
       
-      futureResult.map(x => SuccessfulRequest(loadSpec, System.currentTimeMillis - startTime)).foreach ( r => {
-        val stopTime = System.currentTimeMillis
-        context.system.eventStream.publish(r) 
-      })
+      futureResult.map(
+        x => SuccessfulRequest(loadSpec, System.currentTimeMillis - startTime)).foreach(r => {
+          if(!actorStoped) {//TODO better way to do this? Get a nullpointer if i try to publish when the actor has terminated
+            context.system.eventStream.publish(r)
+          }
+        })
 
     case _ =>
       println("Handle error")
