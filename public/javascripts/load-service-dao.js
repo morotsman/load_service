@@ -4,7 +4,7 @@
 
 define([ 'angular' ], function(angular) {
 
-	var myModule = angular.module('myApp.load-service-dao', []);
+	var myModule = angular.module('loadService.load-service-dao', []);
 
 	myModule.factory('loadServiceDao', [ '$http','$q', function($http,$q) {
 

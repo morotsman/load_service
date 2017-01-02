@@ -2,10 +2,10 @@
 
 'use strict';
 
-require([ 'angular', './load-service-dao' ], function() {
+require([ 'angular', './load-service-dao'], function() {
 
-	var controllers = angular.module('myApp.load-service-controller',
-			[ 'myApp.load-service-dao' ]);
+	var controllers = angular.module('loadService.load-service-controller',
+			[ 'loadService.load-service-dao' ]);
 
 	controllers.controller('loadServiceCtrl', [ '$scope', 'loadServiceDao','$q','$timeout',
 			function($scope, loadServiceDao, $q, $timeout) {
@@ -23,6 +23,53 @@ require([ 'angular', './load-service-dao' ], function() {
 				$scope.loadResourceList = [];
 				$scope.showInfo = showInfo;
 				$scope.getId = getId;
+				
+				$scope.failedChartOptions = {
+						series: {shadowSize: 0},
+						xaxis: {
+							show: false
+						},	
+						legend: { position: "se"}
+					}
+				
+				$scope.sucessfulChartOptions = {
+						series: {shadowSize: 0},
+						xaxis: {
+							show: false
+						},
+						legend: { position: "se"},
+						yaxes: [ { min: 0 }, {
+							min:0,
+							alignTicksWithAxis: 1,
+							position: 1,
+							tickFormatter: function (v, axis) {
+								return v.toFixed(axis.tickDecimals) + "ms";
+							}
+						}]
+					};				
+				
+				/* To be removed*/
+				$scope.plotOptions = {
+						series: {shadowSize: 0},
+						xaxis: {
+							show: false
+						},
+						legend: { position: "se"},
+						yaxes: [ { min: 0 }, {
+							min:0,
+							alignTicksWithAxis: 1,
+							position: 1,
+							tickFormatter: function (v, axis) {
+								return v.toFixed(axis.tickDecimals) + "ms";
+							}
+						}]
+					};
+				
+				$scope.plotData = [
+					               { label: "Req/s", data: [[0,0],[1,1],[2,2]]},
+					               { label: "Latancy", data: [[0,1],[1,1], [2,1]], yaxis:2}
+					           ];
+				/* End To be removed*/
 		
 				activate();
 				
@@ -205,32 +252,7 @@ require([ 'angular', './load-service-dao' ], function() {
 					return type + resource.method + resource.url.replace(/\//g, "").replace(/:/g, "");
 				}
 				
-				function watchStatistics(resource) {
-					var failedChartOptions = {
-							series: {shadowSize: 0},
-							xaxis: {
-								show: false
-							},	
-							legend: { position: "se"}
-						}
-					
-					var sucessfulChartOptions = {
-							series: {shadowSize: 0},
-							xaxis: {
-								show: false
-							},
-							legend: { position: "se"},
-							yaxes: [ { min: 0 }, {
-								min:0,
-								alignTicksWithAxis: 1,
-								position: 1,
-								tickFormatter: function (v, axis) {
-									return v.toFixed(axis.tickDecimals) + "ms";
-								}
-							}]
-						};
-					
-					
+				function watchStatistics(resource, index) {
 					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url}}));
 					
 					if(!plotData[getId("successful",resource)]) {
@@ -251,8 +273,8 @@ require([ 'angular', './load-service-dao' ], function() {
 							               { label: "Req/s", data: failed, points: { symbol: "triangle"} }
 							           ];
 					
-					$("#" + getId('successful', resource)).plot(successfulDataset, sucessfulChartOptions).data("plot");
-					$("#" + getId('failed', resource)).plot(failedDataset, failedChartOptions).data("plot")
+					$("#" + getId('successful', resource)).plot(successfulDataset, $scope.sucessfulChartOptions).data("plot");
+					$("#" + getId('failed', resource)).plot(failedDataset, $scope.failedChartOptions).data("plot")
 					
 				}
 				
@@ -264,7 +286,7 @@ require([ 'angular', './load-service-dao' ], function() {
 					var resource = $scope.loadResourceList[index]; 
 					if(resource.currentSide === "flippable_front") {
 						resource.currentSide = "flippable_back";
-						watchStatistics(resource);
+						watchStatistics(resource, index);
 					} else {
 						resource.currentSide = "flippable_front";
 					}

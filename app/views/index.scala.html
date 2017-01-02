@@ -11,6 +11,7 @@
 </head>
 <body ng-controller="loadServiceCtrl">
 
+	
 
 	<br>
 	<div style="margin-left: 80px; margin-right: 80px" ng-cloak>
@@ -130,6 +131,15 @@
 									</div>
 								</div>
 								<div class="col-md-6">
+									<h4 class="text-center">Successful Requests</h4>
+									<div id="statistics" class="big-chart">
+										<div class="chart-holder">
+											<load-service-plot plot-options="sucessfulChartOptions" data="plotData" class="chart"></load-service-plot>
+										</div>
+									</div>
+								</div>
+								<!--  
+								<div class="col-md-6">
 									<h4 class="text-center">Failed Requests</h4>
 									<div id="statistics" class="big-chart">
 										<div class="chart-holder">
@@ -138,7 +148,7 @@
 										</div>
 									</div>
 								</div>
-			
+								-->
 							</div>
 							<div style="margin-top: 20px" class="col-md-2">
 								<p>
