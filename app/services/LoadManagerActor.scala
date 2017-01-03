@@ -62,11 +62,12 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
       sender ! session
     case ListLoadResources =>
       sender ! loadResources.keys
-    case CreateLoadReource(loadSpec) =>
-      loadResources = loadResources + ((index + "") -> loadSpec.copy(status = Some("Inactive"), id = Some(index + "")))
+    case CreateLoadReource(resource) =>
+      val createdResource = resource.copy(status = Some("Inactive"), id = Some(index + ""))
+      loadResources = loadResources + ((index + "") -> createdResource)
       index = index + 1
-      context.system.eventStream.publish(LoadResourceCreated(loadSpec))
-      sender ! loadSpec
+      context.system.eventStream.publish(LoadResourceCreated(createdResource))
+      sender ! createdResource
     case UpdateLoadResource(id, loadSpec) =>
       val resource = loadResources.get(id) map { r =>
         loadSpec.copy(status = r.status)

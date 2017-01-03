@@ -49,12 +49,7 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
           eventBus.publish(FailedRequest(loadSpec, e, System.currentTimeMillis - startTime))
       })
 
-      
-      futureResult.map(
-        x => SuccessfulRequest(loadSpec, System.currentTimeMillis - startTime)).foreach(r => {
-            eventBus.publish(r)
-        })
-
+      futureResult.map(_ => SuccessfulRequest(loadSpec, System.currentTimeMillis - startTime)).foreach(eventBus.publish)
     case _ =>
       println("Handle error")
   }
