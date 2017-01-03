@@ -13,7 +13,7 @@ import play.api.libs.ws._
 import services.StatisticsActor._
 
 object LoadManagerActor {
-  def props(ws:WSClient) = Props[LoadManagerActor](new LoadManagerActor(ws))
+  def props(ws: WSClient) = Props[LoadManagerActor](new LoadManagerActor(ws))
 
   case class ListLoadResources()
   case class GetLoadResource(index: String)
@@ -29,73 +29,66 @@ object LoadManagerActor {
 class LoadManagerActor(val ws: WSClient) extends Actor {
   import LoadManagerActor._
 
-
   var loadResources: Map[String, LoadSpec] = Map()
-  
-  var index:Integer = 0
-  
+
+  var index: Integer = 0
 
   def receive = {
-    case StartLoadSession(name) => 
-       val result = loadResources.get(name) match {
-        case None => None
-        case Some(r) =>
-          if(r.status.getOrElse("Inactive") == "Inactive") {
-            val session = context.actorOf(LoadSessionActor.props(name,r,ws), "load-session-" + name)         
-            loadResources = loadResources + (name -> r.copy(status = Some("Active")))
-            session ! StartSession 
+    case StartLoadSession(id) =>
+      val resource = loadResources.get(id) 
+
+      resource foreach { r =>
+          if (r.status.getOrElse("Inactive") == "Inactive") {
+            val session = context.actorOf(LoadSessionActor.props(id, r, ws), "load-session-" + id)
+            loadResources = loadResources + (id -> r.copy(status = Some("Active")))
+            session ! StartSession
           }
-          Some(LoadSession) 
       }
-      sender ! result
-    case EndLoadSession(name) => 
-       val rs = for(
-         r <- loadResources.get(name);  
-         s <- context.child("load-session-" + name)
-       ) yield (r,s) 
-       
-       val result = rs match { 
-         case None => None
-         case Some((r,s)) => 
-           s ! EndSession
-           loadResources = loadResources + (name -> r.copy(status = Some("Inactive")))
-           Some(LoadSession)
-       }
-       sender ! result
+      
+      val session = resource map { r => LoadSession(id) }  
+      sender ! session
+    case EndLoadSession(id) =>
+      val rs = for (
+        r <- loadResources.get(id);
+        s <- context.child("load-session-" + id)
+      ) yield (r, s)
+
+      rs foreach { case(r,s) =>
+          s ! EndSession
+          loadResources = loadResources + (id -> r.copy(status = Some("Inactive")))
+      }
+      
+      val session = (rs map { _ => LoadSession})
+      sender ! session
     case ListLoadResources =>
       sender ! loadResources.keys
     case CreateLoadReource(loadSpec) =>
-      loadResources = loadResources + ((index+"") -> loadSpec.copy(status = Some("Inactive")))
+      loadResources = loadResources + ((index + "") -> loadSpec.copy(status = Some("Inactive"), id = Some(index + "")))
       index = index + 1
-      context.system.eventStream.publish(LoadResourceCreated(loadSpec)) 
+      context.system.eventStream.publish(LoadResourceCreated(loadSpec))
       sender ! loadSpec
-    case UpdateLoadResource(name, loadSpec) =>
-      val result = loadResources.get(name) match {
-        case None => None
-        case Some(r) => 
-          var updatedResource = loadSpec.copy(status = r.status)
-          loadResources = loadResources + (name -> updatedResource)
-          Some(updatedResource)
+    case UpdateLoadResource(id, loadSpec) =>
+      val resource = loadResources.get(id) map { r =>
+        loadSpec.copy(status = r.status)
+      }
+      
+      resource foreach { r => 
+        loadResources = loadResources + (id -> r)
+      }
+      
+      sender ! resource
+    case DeleteLoadResource(id) =>
+      val resource = loadResources.get(id)
+
+      resource.foreach { r =>
+        loadResources = loadResources - id
+        context.system.eventStream.publish(LoadResourceDeleted(r))
+        context.child("load-session-" + id) foreach { a =>
+          a ! EndSession
         }
-      sender ! result
-    case DeleteLoadResource(name) =>
-      val result = loadResources.get(name) match {
-        case None => None
-        case Some(r) => 
-          loadResources = loadResources - name
-          context.child("load-session-" + name) match {
-            case None => 
-            case Some(a) => 
-              a ! EndSession
-          }
-          Some(r)
       }
-      
-      result.foreach { x =>  
-        context.system.eventStream.publish(LoadResourceDeleted(x))
-      }
-      
-      sender ! result
+
+      sender ! resource
     case GetLoadResource(name) =>
       sender ! loadResources.get(name)
 

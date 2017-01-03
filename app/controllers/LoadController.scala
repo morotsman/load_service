@@ -36,8 +36,8 @@ class LoadController @Inject() (actorSystem: ActorSystem,ws: WSClient)(implicit 
     (loadManagerActor ? ListLoadResources).mapTo[Set[String]].map { msg => Ok(Json.toJson(msg)) }
   }
   
-  def getLoadResource(name: String) = Action.async {
-    (loadManagerActor ? GetLoadResource(name)).mapTo[Option[LoadSpec]].map { 
+  def getLoadResource(id: String) = Action.async {
+    (loadManagerActor ? GetLoadResource(id)).mapTo[Option[LoadSpec]].map { 
       case Some(msg) => Ok(Json.toJson(msg)) 
       case None => NotFound
     }
@@ -52,9 +52,9 @@ class LoadController @Inject() (actorSystem: ActorSystem,ws: WSClient)(implicit 
   }
   
   
-  def updateLoadResource(name: String) = Action.async(BodyParsers.parse.json) { request =>
+  def updateLoadResource(id: String) = Action.async(BodyParsers.parse.json) { request =>
     request.body.validate[LoadSpec].map {
-      loadSpec => (loadManagerActor ? UpdateLoadResource(name,loadSpec)).mapTo[Option[LoadSpec]].map { 
+      loadSpec => (loadManagerActor ? UpdateLoadResource(id,loadSpec.copy(id = Some(id)))).mapTo[Option[LoadSpec]].map { 
         case Some(resource) => Ok(Json.toJson(resource)) 
         case None => NotFound  
       }
@@ -63,8 +63,8 @@ class LoadController @Inject() (actorSystem: ActorSystem,ws: WSClient)(implicit 
     }
   }
 
-def deleteLoadResource(name: String) = Action.async {
-    (loadManagerActor ? DeleteLoadResource(name)).mapTo[Option[LoadSpec]].map { 
+def deleteLoadResource(id: String) = Action.async {
+    (loadManagerActor ? DeleteLoadResource(id)).mapTo[Option[LoadSpec]].map { 
         case Some(resource) => Ok 
         case None => NotFound  
       }

@@ -3,7 +3,7 @@ package model
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-case class LoadSpec(val method: String, val url: String, val numberOfRequestPerSecond: Int, val maxTimeForRequestInMillis: Int, val body: String, val status: Option[String])
+case class LoadSpec(val method: String, val url: String, val numberOfRequestPerSecond: Int, val maxTimeForRequestInMillis: Int, val body: String, val status: Option[String], val id: Option[String])
 
 object LoadSpec {
   implicit val loadSpecWrites = new Writes[LoadSpec] {
@@ -13,7 +13,8 @@ object LoadSpec {
       "numberOfRequestPerSecond" -> loadSpec.numberOfRequestPerSecond,
       "maxTimeForRequestInMillis" -> loadSpec.maxTimeForRequestInMillis,
       "body" -> loadSpec.body,
-      "status" -> loadSpec.status);
+      "status" -> loadSpec.status,
+      "id" -> loadSpec.id);
 
   }
 
@@ -23,6 +24,7 @@ object LoadSpec {
     (JsPath \ "numberOfRequestPerSecond").read[Int] and
     (JsPath \ "maxTimeForRequestInMillis").read[Int] and
     (JsPath \ "body").read[String] and 
-    (JsPath \ "status").readNullable[String] )(LoadSpec.apply _)
+    (JsPath \ "status").readNullable[String] and 
+    (JsPath \ "id").readNullable[String])(LoadSpec.apply _)
 
 }
