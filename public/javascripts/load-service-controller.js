@@ -22,7 +22,6 @@ require([ 'angular', './load-service-dao'], function() {
 				$scope.stopSession = stopSession;
 				$scope.loadResourceList = [];
 				$scope.showInfo = showInfo;
-				$scope.getId = getId;
 				
 				$scope.failedChartOptions = {
 						series: {shadowSize: 0},
@@ -72,6 +71,15 @@ require([ 'angular', './load-service-dao'], function() {
 					
 				}
 				
+				function getCurrentPlotData(id) {
+					var current = getResource(id);
+					if(current) {
+						return current.plotData;
+					} else {
+						return {};
+					}
+				}
+				
 				function backDisplayed(r) {
 					return r.currentSide === "flippable_back";
 				}
@@ -92,8 +100,9 @@ require([ 'angular', './load-service-dao'], function() {
 									status: details.status,
 									numberOfRequestPerSecond: details.numberOfRequestPerSecond,
 									maxTimeForRequestInMillis: details.maxTimeForRequestInMillis,
-									currentSide: getCurrentSide(services.data[i])
-								})
+									currentSide: getCurrentSide(services.data[i]),
+									plotData : getCurrentPlotData(services.data[i])
+								});
 							}
 							$scope.loadResourceList = result;
 							$timeout(function(){
@@ -152,10 +161,7 @@ require([ 'angular', './load-service-dao'], function() {
 					} else {
 						addResource();
 					}
-					$scope.loadResourceList.splice(index,1);
-					delete plotData[getId("successful",resourceToDelete)];
-					delete plotData[getId("failed",resourceToDelete)];
-					delete plotData[getId("latancy",resourceToDelete)];			
+					$scope.loadResourceList.splice(index,1);		
 				}
 				
 				function startSession(index) {
@@ -166,52 +172,21 @@ require([ 'angular', './load-service-dao'], function() {
 					loadServiceDao.deleteSession($scope.loadResourceList[index]).then(listLoadResources);
 				}
 				
-				var plotData = {};
-			
-				
-				
-				function getPlotData(resource, type, data) {		
-					var result = getHistoricData(type, resource);
-					if(result.length > maxNumberOfStatistics) {
-						result.shift();
-					}
-					
-					var nextIndex = result[result.length-1]?(result[result.length-1][0] + 1):0; 
-					
-					result.push([nextIndex,data]);
-					return result;
+				function updatePlot(plot, data) {
+					var plotData = plot.data;
+					var nextIndex = plotData[plotData.length-1]?(plotData[plotData.length-1][0] + 1):0; 
+					plotData.push([nextIndex,data]);
 				}
 				
 				function updateSuccessfulPlot(resource, numberOfRequests, latancy) {
-					var numbers = getPlotData(resource, "successful", numberOfRequests);
-					var latancies = getPlotData(resource, "latancy", latancy);		
-					
-					var successfulDataset = [
-					                         { label: "Req/s", data: numbers},
-								             { label: "Latancy", data: latancies, yaxis:2}
-								           ];
-					
-					//var currentData = getResource(resource.id).plotData;
-					//currentData[0].data = numbers;
-					//currentData[1].data = latancies;
-					getResource(resource.id).successfulPlotData = successfulDataset;
-					$scope.$apply();
-									
+					var currentData = getResource(resource.id).plotData.successfulPlotData;	
+					updatePlot(currentData[0], numberOfRequests);
+					updatePlot(currentData[1], latancy);
 				}
 				
 				function updateFailedPlot(resource, numberOfRequests) {
-					var failed = getPlotData(resource, "failed", numberOfRequests);
-					
-					var failedDataset = [
-							               { label: "Req/s", data: failed }
-							           ];
-					
-				
-					
-					getResource(resource.id).failedPlotData = failedDataset;
-					$scope.$apply();
-					
-					
+					var currentData = getResource(resource.id).plotData.failedPlotData;	
+					updatePlot(currentData[0], numberOfRequests);
 				}
 				
 				function updateStatistics(msg) {
@@ -224,44 +199,25 @@ require([ 'angular', './load-service-dao'], function() {
 					} else if(eventType === "failed") {
 						updateFailedPlot(data.resource, numberOfRequests);
 					}
-					
+					$scope.$apply();
 				}	
-				
-				function getHistoricData(eventType, resource) {	
-					return plotData[getId(eventType,resource)];
-				}
-				
-				function getId(type, resource) {
-					//return type + resource.method + resource.url.replace(/\//g, "").replace(/:/g, "");
-					return type + resource.id;
-				}
-				
 				
 				function watchStatistics(resource, index) {
 					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url, id: resource.id}}));
 					
-					if(!plotData[getId("successful",resource)]) {
-						plotData[getId("successful",resource)] = [];
-						plotData[getId("latancy",resource)] = [];
-						plotData[getId("failed",resource)] = [];
+					var currentResource = getResource(resource.id); 
+					
+					if(!currentResource.plotData) {
+						currentResource.plotData = {};
 					}
 					
-					var successful = getHistoricData("successful", resource);
-					var failed = getHistoricData("failed", resource);
-					var latancy = getHistoricData("latancy", resource);
+					if(!currentResource.plotData.successfulPlotData) {
+						currentResource.plotData.successfulPlotData = [{ label: "Req/s", data: []}, { label: "Latancy", data: [], yaxis:2}];
+					}
 					
-					var successfulDataset = [
-					               { label: "Req/s", data: successful},
-					               { label: "Latancy", data: latancy, yaxis:2}
-					           ];
-					var failedDataset = [
-							               { label: "Req/s", data: failed, points: { symbol: "triangle"} }
-							           ];
-					
-					getResource(resource.id).successfulPlotData = successfulDataset;
-					getResource(resource.id).failedPlotData = failedDataset;
-					$scope.$apply();
-					
+					if(!currentResource.plotData.failedPlotData) {
+						currentResource.plotData.failedPlotData = [{ label: "Req/s", data: [], points: { symbol: "triangle"} }]; 
+					}
 				}
 				
 				function unWatchStatistics(resource) {

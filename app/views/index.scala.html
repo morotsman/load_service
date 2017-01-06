@@ -125,7 +125,7 @@
 									<h4 class="text-center">Successful Requests</h4>
 									<div id="statistics" class="big-chart">
 										<div class="chart-holder">
-											<load-service-plot plot-options="sucessfulChartOptions" data="resource.successfulPlotData" class="chart"></load-service-plot>
+											<load-service-plot plot-options="sucessfulChartOptions" data="resource.plotData.successfulPlotData" class="chart"></load-service-plot>
 										</div>
 									</div>
 								</div> 
@@ -133,21 +133,10 @@
 									<h4 class="text-center">Failed Requests</h4>
 									<div id="statistics" class="big-chart">
 										<div class="chart-holder">
-											<load-service-plot plot-options="failedChartOptions" data="resource.failedPlotData" class="chart"></load-service-plot>
+											<load-service-plot plot-options="failedChartOptions" data="resource.plotData.failedPlotData" class="chart"></load-service-plot>
 										</div>
 									</div>
 								</div> 
-								<!--   
-								<div class="col-md-6">
-									<h4 class="text-center">Failed Requests</h4>
-									<div id="statistics" class="big-chart">
-										<div class="chart-holder">
-											<div class="chart"
-												id="{{getId('failed', resource)}}"></div>
-										</div>
-									</div>
-								</div>
-								-->
 							</div>
 							<div style="margin-top: 20px" class="col-md-2">
 								<p>

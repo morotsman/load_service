@@ -16,7 +16,6 @@ require([ 'angular', './load-service-dao' , 'flot'], function() {
 	    	$(element).plot(scope.data?scope.data:[], scope.plotOptions).data("plot");
 	    	
 	    	scope.$watch('data', function(newData) {
-	    		console.log(newData);
 	    		if(!newData) return;
 	    		
 	    		var plot = $(element).data("plot");
