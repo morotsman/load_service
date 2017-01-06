@@ -48,28 +48,7 @@ require([ 'angular', './load-service-dao'], function() {
 						}]
 					};				
 				
-				/* To be removed*/
-				$scope.plotOptions = {
-						series: {shadowSize: 0},
-						xaxis: {
-							show: false
-						},
-						legend: { position: "se"},
-						yaxes: [ { min: 0 }, {
-							min:0,
-							alignTicksWithAxis: 1,
-							position: 1,
-							tickFormatter: function (v, axis) {
-								return v.toFixed(axis.tickDecimals) + "ms";
-							}
-						}]
-					};
-				
-				$scope.plotData = [
-					               { label: "Req/s", data: [[0,0],[1,1],[2,2]]},
-					               { label: "Latancy", data: [[0,1],[1,1], [2,1]], yaxis:2}
-					           ];
-				/* End To be removed*/
+
 		
 				activate();
 				
@@ -77,10 +56,14 @@ require([ 'angular', './load-service-dao'], function() {
 					listLoadResources();
 				}
 				
-				function getCurrentSide(id) {
-					var current = $scope.loadResourceList.find(function(r) {
+				function getResource(id) {
+					return $scope.loadResourceList.find(function(r) {
 						return r.id === id;
 					});
+				}
+				
+				function getCurrentSide(id) {
+					var current = getResource(id);
 					if(current) {
 						return current.currentSide;
 					} else {
@@ -208,12 +191,12 @@ require([ 'angular', './load-service-dao'], function() {
 								             { label: "Latancy", data: latancies, yaxis:2}
 								           ];
 					
-					var plot = $("#" + getId("successful",resource)).data("plot");
-					if(plot) {
-						plot.setData(successfulDataset)
-						plot.setupGrid()
-						plot.draw()
-					}					
+					//var currentData = getResource(resource.id).plotData;
+					//currentData[0].data = numbers;
+					//currentData[1].data = latancies;
+					getResource(resource.id).successfulPlotData = successfulDataset;
+					$scope.$apply();
+									
 				}
 				
 				function updateFailedPlot(resource, numberOfRequests) {
@@ -223,12 +206,12 @@ require([ 'angular', './load-service-dao'], function() {
 							               { label: "Req/s", data: failed }
 							           ];
 					
-					var plot = $("#" + getId("failed", resource)).data("plot");
-					if(plot) {
-						plot.setData(failedDataset)
-						plot.setupGrid()
-						plot.draw()
-					}	
+				
+					
+					getResource(resource.id).failedPlotData = failedDataset;
+					$scope.$apply();
+					
+					
 				}
 				
 				function updateStatistics(msg) {
@@ -253,6 +236,7 @@ require([ 'angular', './load-service-dao'], function() {
 					return type + resource.id;
 				}
 				
+				
 				function watchStatistics(resource, index) {
 					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url, id: resource.id}}));
 					
@@ -274,8 +258,9 @@ require([ 'angular', './load-service-dao'], function() {
 							               { label: "Req/s", data: failed, points: { symbol: "triangle"} }
 							           ];
 					
-					$("#" + getId('successful', resource)).plot(successfulDataset, $scope.sucessfulChartOptions).data("plot");
-					$("#" + getId('failed', resource)).plot(failedDataset, $scope.failedChartOptions).data("plot")
+					getResource(resource.id).successfulPlotData = successfulDataset;
+					getResource(resource.id).failedPlotData = failedDataset;
+					$scope.$apply();
 					
 				}
 				

@@ -17,13 +17,15 @@ require([ 'angular', './load-service-dao' , 'flot'], function() {
 	    	
 	    	scope.$watch('data', function(newData) {
 	    		console.log(newData);
+	    		if(!newData) return;
+	    		
 	    		var plot = $(element).data("plot");
 				if(plot) {
 					plot.setData(newData)
 					plot.setupGrid()
 					plot.draw()
 				}
-	    	});
+	    	},true);
 	    }
 	  };
 	}]);
