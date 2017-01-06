@@ -9,18 +9,18 @@ import model._
 object StatisticsActor {
   def props = Props[StatisticsActor]
 
-  case class FailedRequest(loadSpec: LoadSpec, e: Throwable, timeInMillis: Long)
-  case class SuccessfulRequest(loadSpec: LoadSpec,timeInMillis: Long)
+  case class FailedRequest(loadSpec: ResourceKey, e: Throwable, timeInMillis: Long)
+  case class SuccessfulRequest(loadSpec: ResourceKey,timeInMillis: Long)
   case class AgggregateStatistcs()
 
-  case class LoadResourceCreated(loadSpec: LoadSpec)
-  case class LoadResourceDeleted(loadSpec: LoadSpec)
+  case class LoadResourceCreated(loadSpec: ResourceKey)
+  case class LoadResourceDeleted(loadSpec: ResourceKey)
   
 
   case class StatisticsEvent(loadResource: ResourceKey, numberOfRequests: Int, eventType: String, avargeTimeInMillis: Long)
 }
 
-class StatisticsActor extends Actor {
+class StatisticsActor extends Actor {  
   import StatisticsActor._
 
   var successfulRequestsLastSecond: scala.collection.mutable.Map[ResourceKey, List[Long]] = scala.collection.mutable.Map()
@@ -42,7 +42,6 @@ class StatisticsActor extends Actor {
 
   println("StatisticsActor created")
 
-  def getKey(loadSpec: LoadSpec): ResourceKey = ResourceKey(loadSpec.method, loadSpec.url)
 
   def aggregateFailure(errors: List[String]): Map[String, Int] =
     errors.groupBy(e => e).map(ge => (ge._1, ge._2.size))
@@ -52,16 +51,20 @@ class StatisticsActor extends Actor {
     else Some(l.sum/l.size)
 
   def receive = {
-    case FailedRequest(l, e, t) =>
-      failedRequestsLastSecond(getKey(l)) = e.getClass.toString :: failedRequestsLastSecond(getKey(l))
-    case SuccessfulRequest(l, t) =>
-      successfulRequestsLastSecond(getKey(l)) = t::successfulRequestsLastSecond(getKey(l)) 
-    case LoadResourceCreated(l) =>
-      successfulRequestsLastSecond = successfulRequestsLastSecond + (getKey(l) -> Nil)
-      failedRequestsLastSecond = failedRequestsLastSecond + (getKey(l) -> Nil)
-    case LoadResourceDeleted(l) =>
-      successfulRequestsLastSecond = successfulRequestsLastSecond - getKey(l)
-      failedRequestsLastSecond = failedRequestsLastSecond - getKey(l)
+    case FailedRequest(r, e, t) => 
+      failedRequestsLastSecond.get(r) foreach { f => 
+        failedRequestsLastSecond(r) = e.getClass.toString :: f
+      }  
+    case SuccessfulRequest(r, t) =>
+      successfulRequestsLastSecond.get(r) foreach { s => 
+        successfulRequestsLastSecond(r) = t::s 
+      }
+    case LoadResourceCreated(r) =>
+      successfulRequestsLastSecond = successfulRequestsLastSecond + (r -> Nil)
+      failedRequestsLastSecond = failedRequestsLastSecond + (r -> Nil)
+    case LoadResourceDeleted(r) =>
+      successfulRequestsLastSecond = successfulRequestsLastSecond - r
+      failedRequestsLastSecond = failedRequestsLastSecond - r
     case AgggregateStatistcs =>
       context.system.scheduler.scheduleOnce(1000.millis, self, AgggregateStatistcs)
       successfulRequestsLastSecond.foreach(s => {

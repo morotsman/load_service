@@ -33,7 +33,7 @@ class UserActor @Inject()(@Assisted out: ActorRef,
 
     case json: JsValue =>
       val action = (json \ "action").as[String]
-      val resource = (json \ "resource").as[ResourceKey]
+      val resource = (json \ "resource").as[ResourceKey]    
       if(action == "watch") {
         println("UserActor: watch");
         observedMocks = observedMocks + resource

@@ -20,9 +20,9 @@ define([ 'angular' ], function(angular) {
 			}));
 		}
 		
-		function getLoadResource(name) {
-			return $http.get("load-resource/" + name).then(function(loadResource) {
-				loadResource.name = name;
+		function getLoadResource(id) {
+			return $http.get("load-resource/" + id).then(function(loadResource) {
+				loadResource.id = id;
 				return loadResource;
 			});
 		}
@@ -42,19 +42,19 @@ define([ 'angular' ], function(angular) {
 		}
 		
 		function deleteLoadResource(loadResource) {
-			return $http.delete("load-resource/" + loadResource.name);
+			return $http.delete("load-resource/" + loadResource.id);
 		}
 		
 		function updateLoadResource(loadResource) {
-			return $http.put("load-resource/" + loadResource.name, mapLoadResource(loadResource));
+			return $http.put("load-resource/" + loadResource.id, mapLoadResource(loadResource));
 		}
 		
 		function createSession(loadResource) {
-			return $http.put("load-session/" + loadResource.name)
+			return $http.put("load-session/" + loadResource.id)
 		}
 		
 		function deleteSession(loadResource) {
-			return $http.delete("load-session/" + loadResource.name)
+			return $http.delete("load-session/" + loadResource.id)
 		}
 
 		

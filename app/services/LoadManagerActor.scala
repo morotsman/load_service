@@ -5,8 +5,7 @@ import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import akka.util.Timeout
 
-import model.LoadSpec
-import model.LoadSession
+import model._
 import LoadSessionActor._
 import play.api.libs.ws._
 
@@ -35,41 +34,38 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
 
   def receive = {
     case StartLoadSession(id) =>
-      val resource = loadResources.get(id) 
+      val r = loadResources.get(id) 
 
-      resource foreach { r =>
+      r foreach { r =>
           if (r.status.getOrElse("Inactive") == "Inactive") {
             val session = context.actorOf(LoadSessionActor.props(id, r, ws), "load-session-" + id)
             loadResources = loadResources + (id -> r.copy(status = Some("Active")))
             session ! StartSession
           }
       }
-      
-      val session = resource map { r => LoadSession(id) }  
-      sender ! session
+
+      sender ! (r map { r => LoadSession(id) } )
     case EndLoadSession(id) =>
-      val rs = for (
+      loadResources.get(id) foreach { r => loadResources = loadResources + (id -> r.copy(status = Some("Inactive"))) }     
+      
+      val s = for (
         r <- loadResources.get(id);
         s <- context.child("load-session-" + id)
-      ) yield (r, s)
-
-      rs foreach { case(r,s) =>
-          s ! EndSession
-          loadResources = loadResources + (id -> r.copy(status = Some("Inactive")))
-      }
+      ) yield (s)
       
-      val session = (rs map { _ => LoadSession})
-      sender ! session
+      s foreach { _ ! EndSession }
+      sender ! (s map { _ => LoadSession})
     case ListLoadResources =>
       sender ! loadResources.keys
     case CreateLoadReource(resource) =>
-      val createdResource = resource.copy(status = Some("Inactive"), id = Some(index + ""))
+      val newIndex = index + ""
+      val createdResource = resource.copy(status = Some("Inactive"), id = Some(newIndex))
       loadResources = loadResources + ((index + "") -> createdResource)
       index = index + 1
-      context.system.eventStream.publish(LoadResourceCreated(createdResource))
+      context.system.eventStream.publish(LoadResourceCreated(ResourceKey(createdResource.method, createdResource.url, newIndex)))
       sender ! createdResource
     case UpdateLoadResource(id, loadSpec) =>
-      val resource = loadResources.get(id) map { r =>
+      val resource = loadResources.get(id) map { r =>   
         loadSpec.copy(status = r.status)
       }
       
@@ -83,7 +79,7 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
 
       resource.foreach { r =>
         loadResources = loadResources - id
-        context.system.eventStream.publish(LoadResourceDeleted(r))
+        context.system.eventStream.publish(LoadResourceDeleted(ResourceKey(r.method, r.url, id)))
         context.child("load-session-" + id) foreach { a =>
           a ! EndSession
         }

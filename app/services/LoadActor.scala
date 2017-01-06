@@ -7,7 +7,7 @@ import akka.util.Timeout
 import javax.inject._
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 
-import model.LoadSpec
+import model._
 
 import play.api.libs.ws._
 import play.api.http.HttpEntity
@@ -27,7 +27,7 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
   
   
   def receive = {
-    case SendRequest(id) =>
+    case SendRequest(requestNumber) =>
       val startTime = System.currentTimeMillis
       val request: WSRequest = ws.url(loadSpec.url)
       val complexRequest: WSRequest =
@@ -46,10 +46,17 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
 
       futureResult.recover({
         case e =>
-          eventBus.publish(FailedRequest(loadSpec, e, System.currentTimeMillis - startTime))
+          loadSpec.id foreach { id => 
+            eventBus.publish(FailedRequest(ResourceKey(loadSpec.method, loadSpec.url, id), e, System.currentTimeMillis - startTime))
+          }
+          
       })
+      
+      loadSpec.id foreach { id => 
+        futureResult.map(_ => SuccessfulRequest(ResourceKey(loadSpec.method, loadSpec.url, id), System.currentTimeMillis - startTime)).foreach(eventBus.publish)
+      }
 
-      futureResult.map(_ => SuccessfulRequest(loadSpec, System.currentTimeMillis - startTime)).foreach(eventBus.publish)
+      
     case _ =>
       println("Handle error")
   }

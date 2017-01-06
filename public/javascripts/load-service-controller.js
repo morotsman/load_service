@@ -77,9 +77,9 @@ require([ 'angular', './load-service-dao'], function() {
 					listLoadResources();
 				}
 				
-				function getCurrentSide(name) {
+				function getCurrentSide(id) {
 					var current = $scope.loadResourceList.find(function(r) {
-						return r.name === name;
+						return r.id === id;
 					});
 					if(current) {
 						return current.currentSide;
@@ -102,7 +102,7 @@ require([ 'angular', './load-service-dao'], function() {
 								var details = loadServiceDetails[i].data;
 								result.push({
 									create: false,
-									name: services.data[i],
+									id: services.data[i],
 									method: details.method,
 									url: details.url,
 									body: details.body,	
@@ -249,11 +249,12 @@ require([ 'angular', './load-service-dao'], function() {
 				}
 				
 				function getId(type, resource) {
-					return type + resource.method + resource.url.replace(/\//g, "").replace(/:/g, "");
+					//return type + resource.method + resource.url.replace(/\//g, "").replace(/:/g, "");
+					return type + resource.id;
 				}
 				
 				function watchStatistics(resource, index) {
-					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url}}));
+					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url, id: resource.id}}));
 					
 					if(!plotData[getId("successful",resource)]) {
 						plotData[getId("successful",resource)] = [];
@@ -279,7 +280,7 @@ require([ 'angular', './load-service-dao'], function() {
 				}
 				
 				function unWatchStatistics(resource) {
-					websocket.send(JSON.stringify({action:"unWatch", resource: {method: resource.method, url: resource.url}}));
+					websocket.send(JSON.stringify({action:"unWatch", resource: {method: resource.method, url: resource.url, id: resource.id}}));
 				}
 
 				function showInfo(index) {
