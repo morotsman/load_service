@@ -37,8 +37,10 @@ class UserActor @Inject()(@Assisted out: ActorRef,
       val resource = (json \ "resource").as[ResourceKey]    
       if(action == "watch") {
         println("UserActor: watch");
-        observedMocks = observedMocks + resource
-        context.system.eventStream.publish(HistoricData(resource,self));
+        if(!observedMocks.contains(resource)) {
+          observedMocks = observedMocks + resource
+          context.system.eventStream.publish(HistoricData(resource,self));
+        }  
       } else if(action == "unWatch"){
         println("UserActor: unwatch");
         observedMocks = observedMocks - resource
