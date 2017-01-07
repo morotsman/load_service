@@ -191,16 +191,28 @@ require([ 'angular', './load-service-dao'], function() {
 				
 				function updateStatistics(msg) {
 					var data = JSON.parse(msg.data);
-					var eventType = data.eventType
-					var numberOfRequests = data.numberOfRequestsPerSecond;
-					var latancy = data.avargeLatancyInMillis;
-					if(eventType === "successful") {
-						updateSuccessfulPlot(data.resource, numberOfRequests, latancy);
-					} else if(eventType === "failed") {
-						updateFailedPlot(data.resource, numberOfRequests);
+					var type = data.type;
+					if(type === "statisticsEvents") {
+						data.events.forEach(function(e){
+							handleEvent(e);
+						});
+					} else {
+						handleEvent(data);
 					}
+					
 					$scope.$apply();
 				}	
+				
+				function handleEvent(event) {
+					var eventType = event.eventType
+					var numberOfRequests = event.numberOfRequestsPerSecond;
+					var latancy = event.avargeLatancyInMillis;
+					if(eventType === "successful") {
+						updateSuccessfulPlot(event.resource, numberOfRequests, latancy);
+					} else if(eventType === "failed") {
+						updateFailedPlot(event.resource, numberOfRequests);
+					}
+				}
 				
 				function watchStatistics(resource, index) {
 					websocket.send(JSON.stringify({action:"watch", resource: {method: resource.method, url: resource.url, id: resource.id}}));

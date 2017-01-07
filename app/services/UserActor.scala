@@ -51,9 +51,10 @@ class UserActor @Inject()(@Assisted out: ActorRef,
          out ! statisticsEvent
       }
     case StatisticEvents(events) =>
-      events.reverse.foreach { e => 
-        out ! Json.obj("type" -> "statisticsEvent", "resource" -> e.loadResource, "numberOfRequestsPerSecond" -> e.numberOfRequests, "eventType" -> e.eventType, "avargeLatancyInMillis" -> e.avargeTimeInMillis)
+      val eventsAsJson = events.reverse.map { e => 
+         Json.obj("type" -> "statisticsEvent", "resource" -> e.loadResource, "numberOfRequestsPerSecond" -> e.numberOfRequests, "eventType" -> e.eventType, "avargeLatancyInMillis" -> e.avargeTimeInMillis)
       }
+      out ! Json.obj("events" -> eventsAsJson, "type" -> "statisticsEvents")
      
     case unknown@_ => 
       println("Unknown message received by UserActor: " + unknown)
