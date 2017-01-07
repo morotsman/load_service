@@ -105,9 +105,9 @@ require([ 'angular', './load-service-dao'], function() {
 								});
 							}
 							$scope.loadResourceList = result;
-							$timeout(function(){
-								$scope.loadResourceList.filter(backDisplayed).forEach(watchStatistics);
-							},1);
+							//$timeout(function(){
+								//$scope.loadResourceList.filter(backDisplayed).forEach(watchStatistics);
+							//},1);
 							
 						
 						});
