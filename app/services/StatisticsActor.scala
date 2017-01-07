@@ -82,6 +82,7 @@ class StatisticsActor extends Actor {
     case LoadResourceDeleted(r) =>
       successfulRequestsLastSecond = successfulRequestsLastSecond - r
       failedRequestsLastSecond = failedRequestsLastSecond - r
+      historicData = historicData.filter(p => !(p._1._1 == r))
     case AgggregateStatistcs =>
       context.system.scheduler.scheduleOnce(1000.millis, self, AgggregateStatistcs)
       successfulRequestsLastSecond.foreach(s => {
