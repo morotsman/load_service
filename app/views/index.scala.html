@@ -54,11 +54,11 @@
 						</div>
 						<div ng-show="resource.status === 'Active'" class="col-md-1">
 							<button type="button" class="btn btn-info"
-								ng-click="stopSession($index)" style="margin-top: 20px">Stop</button>
+								ng-click="stopSession(resource)" style="margin-top: 20px">Stop</button>
 						</div>
 						<div ng-show="resource.status === 'Inactive'" class="col-md-1">
 							<button type="button" class="btn btn-info"
-								ng-click="startSession($index)" style="margin-top: 20px">Start</button>
+								ng-click="startSession(resource)" style="margin-top: 20px">Start</button>
 						</div>
 						<div class="col-md-1">
 							<button type="button" class="btn btn-info"
@@ -84,13 +84,13 @@
 						</div>
 						<div style="margin-top: 20px" class="col-md-2">
 							<p>
-								<button class="btn btn-success" ng-click="updateLoadResource($index)">Update
+								<button class="btn btn-success" ng-click="updateLoadResource(resource)">Update
 									service</button>
 							</p>
 						</div>
 						<div style="margin-top: 20px" class="col-md-2">
 							<p>
-								<button class="btn btn-danger" ng-click="deleteLoadResource($index)">Delete
+								<button class="btn btn-danger" ng-click="deleteLoadResource(resource)">Delete
 									service</button>
 							</p>
 						</div>
@@ -140,7 +140,7 @@
 							</div>
 							<div style="margin-top: 20px" class="col-md-2">
 								<p>
-									<button class="btn btn-success" ng-click="updateLoadResource($index)">Update
+									<button class="btn btn-success" ng-click="updateLoadResource(resource)">Update
 										service</button>
 								</p>
 							</div>
@@ -189,7 +189,7 @@
 					</div>
 					<div style="margin-top: 20px" class="col-md-2">
 						<p>
-							<button class="btn btn-danger" ng-click="deleteLoadResource($index)">Delete
+							<button class="btn btn-danger" ng-click="deleteLoadResource(resource)">Delete
 								service</button>
 						</p>
 					</div>

@@ -97,6 +97,7 @@ class StatisticsActor extends Actor {
         val aggregatedFailures = aggregateFailure(s._2)
         aggregatedFailures.foreach(e => {
           val event = StatisticsEvent(s._1, e._2, e._1, 0)
+          println(event)
           context.system.eventStream.publish(event)
         })
       })

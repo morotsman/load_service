@@ -39,7 +39,7 @@ class LoadController @Inject() (actorSystem: ActorSystem,ws: WSClient)(implicit 
   def getLoadResource(id: String) = Action.async {
     (loadManagerActor ? GetLoadResource(id)).mapTo[Option[LoadSpec]].map { 
       case Some(msg) => Ok(Json.toJson(msg)) 
-      case None => NotFound
+      case None => NotFound  
     }
   }
   

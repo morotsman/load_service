@@ -83,33 +83,31 @@ require([ 'angular', './load-service-dao'], function() {
 				function backDisplayed(r) {
 					return r.currentSide === "flippable_back";
 				}
+				
+				function toLoadResource(loadSpec) {
+					return {
+						create: false,
+						id: loadSpec.id,
+						method: loadSpec.method,
+						url: loadSpec.url,
+						body: loadSpec.body,	
+						status: loadSpec.status,
+						numberOfRequestPerSecond: loadSpec.numberOfRequestPerSecond,
+						maxTimeForRequestInMillis: loadSpec.maxTimeForRequestInMillis,
+						currentSide: getCurrentSide(loadSpec.id),
+						plotData : getCurrentPlotData(loadSpec.id)
+					};
+				}
  
 				function listLoadResources (){
 					loadServiceDao.getLoadResources().then(function(services) {
 						loadServiceDao.getLoadResourceDetails(services.data).then(function(loadServiceDetails){
-							
 							var result = [];
 							for(var i = 0; i < loadServiceDetails.length; i++) {
 								var details = loadServiceDetails[i].data;
-								result.push({
-									create: false,
-									id: services.data[i],
-									method: details.method,
-									url: details.url,
-									body: details.body,	
-									status: details.status,
-									numberOfRequestPerSecond: details.numberOfRequestPerSecond,
-									maxTimeForRequestInMillis: details.maxTimeForRequestInMillis,
-									currentSide: getCurrentSide(services.data[i]),
-									plotData : getCurrentPlotData(services.data[i])
-								});
+								result.push(toLoadResource(details));
 							}
 							$scope.loadResourceList = result;
-							//$timeout(function(){
-								//$scope.loadResourceList.filter(backDisplayed).forEach(watchStatistics);
-							//},1);
-							
-						
 						});
 					})
 				}
@@ -132,17 +130,15 @@ require([ 'angular', './load-service-dao'], function() {
 					$scope.serviceUnderConstruction = false;
 				}
 				
-				function updateLoadResource(index) {
-					var resource = $scope.loadResourceList[index];
-					
+				function updateLoadResource(resource) {
 					if(resource.status === 'Active') {
 						loadServiceDao.deleteSession(resource).then(function(){
 							loadServiceDao.updateLoadResource(resource).then(function() {
-								loadServiceDao.createSession(resource).then(listLoadResources);						
+								loadServiceDao.createSession(resource);						
 							})
 						})
 					} else {
-						loadServiceDao.updateLoadResource(resource).then(listLoadResources);
+						loadServiceDao.updateLoadResource(resource);
 					}
 					
 					
@@ -150,31 +146,50 @@ require([ 'angular', './load-service-dao'], function() {
 				
 				
 				function createLoadResource(index) {
-					loadServiceDao.createLoadResource($scope.loadResourceList[index]).then(listLoadResources).then(addResource);
+					loadServiceDao.createLoadResource($scope.loadResourceList[index]).then(function(resource) {
+						$scope.loadResourceList.splice(index,1);
+						$scope.loadResourceList.push(toLoadResource(resource.data));
+					}).then(addResource);
 				}
-				
-				function deleteLoadResource(index) {
-					var resourceToDelete = $scope.loadResourceList[index];
-					if(!resourceToDelete.create) {
-						unWatchStatistics(resourceToDelete);
-						loadServiceDao.deleteLoadResource(resourceToDelete).then(listLoadResources);
+	
+				function deleteLoadResource(resource) {
+					if(!resource.create) {
+						unWatchStatistics(resource);
+						loadServiceDao.deleteLoadResource(resource);
 					} else {
 						addResource();
 					}
-					$scope.loadResourceList.splice(index,1);		
+					$scope.loadResourceList.splice(resourceIndex($scope.loadResourceList, resource),1);		
 				}
 				
-				function startSession(index) {
-					loadServiceDao.createSession($scope.loadResourceList[index]).then(listLoadResources);
+				function resourceIndex(resourceList, resource) {
+					return resourceList.findIndex(function(r) {
+						return r.id === resource.id;
+					});
 				}
 				
-				function stopSession(index) {
-					loadServiceDao.deleteSession($scope.loadResourceList[index]).then(listLoadResources);
+				function replaceLoadResource(resource) {
+					loadServiceDao.getLoadResource(resource.id).then(function(data) {
+						var resource = data.data;
+						var index = resourceIndex($scope.loadResourceList, resource);
+						$scope.loadResourceList.splice(index,1, toLoadResource(resource));
+					});
+				}
+				
+				function startSession(resource) {
+					loadServiceDao.createSession(resource).then(function() { replaceLoadResource(resource) });
+				}
+				
+				function stopSession(resource) {
+					loadServiceDao.deleteSession(resource).then(function() { replaceLoadResource(resource) });
 				}
 				
 				function updatePlot(plot, data) {
 					var plotData = plot.data;
 					var nextIndex = plotData[plotData.length-1]?(plotData[plotData.length-1][0] + 1):0; 
+					if(plotData.length > maxNumberOfStatistics) {
+						plotData.shift();
+					}
 					plotData.push([nextIndex,data]);
 				}
 				

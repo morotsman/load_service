@@ -59,6 +59,7 @@ define([ 'angular' ], function(angular) {
 
 		
 		return {
+			getLoadResource : getLoadResource,
 			getLoadResources : getLoadResources,
 			getLoadResourceDetails : getLoadResourceDetails,
 			createLoadResource : createLoadResource,
