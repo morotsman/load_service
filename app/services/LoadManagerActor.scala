@@ -4,12 +4,19 @@ import akka.actor._
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import akka.util.Timeout
+import java.net.ConnectException
 
 import model._
 import LoadSessionActor._
 import play.api.libs.ws._
 
 import services.StatisticsActor._
+
+import akka.actor.OneForOneStrategy
+import akka.actor.SupervisorStrategy._
+import scala.concurrent.duration._
+
+
 
 object LoadManagerActor {
   def props(ws: WSClient) = Props[LoadManagerActor](new LoadManagerActor(ws))
@@ -23,6 +30,8 @@ object LoadManagerActor {
   case class ListLoadSessions()
   case class StartLoadSession(name: String)
   case class EndLoadSession(name: String)
+  
+  
 }
 
 class LoadManagerActor(val ws: WSClient) extends Actor {
@@ -31,6 +40,21 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
   var loadResources: Map[String, LoadSpec] = Map()
 
   var index: Integer = 0
+  
+  override val supervisorStrategy =
+    OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
+      case e: LoadConnectException => 
+        println("LoadManagerActor: stopping")
+        for(
+          id <- e.id;
+          r <- loadResources.get(id)
+        ) {
+          loadResources = loadResources + (id -> r.copy(status = Some("Inactive")))
+        }
+        Stop
+      case t =>
+        super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
+    }
 
   def receive = {
     case StartLoadSession(id) =>

@@ -1,6 +1,7 @@
 package services
 
 import akka.actor._
+import java.net.ConnectException
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import akka.util.Timeout
@@ -10,6 +11,9 @@ import model.LoadSpec
 import LoadActor._
 import akka.actor.Cancellable
 import play.api.libs.ws._
+import akka.actor.OneForOneStrategy
+import akka.actor.SupervisorStrategy._
+import scala.concurrent.duration._
 
 object LoadSessionActor {
   def props(name: String, loadSpec: LoadSpec, ws: WSClient) = Props[LoadSessionActor](new LoadSessionActor(name, loadSpec, ws))
@@ -22,6 +26,17 @@ object LoadSessionActor {
 class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClient) extends Actor {
   import LoadSessionActor._
 
+
+ 
+  override val supervisorStrategy =
+    OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
+      case _: LoadConnectException => 
+        Escalate
+      case t =>
+        super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
+    }
+  
+  
   val loadActor = context.actorOf(LoadActor.props(ws, loadSpec), "load-actor-" + name)
   var cancellables: List[Cancellable] = Nil
   var index = 0
@@ -36,7 +51,7 @@ class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClien
     case StartSession =>
       println("LoadSessionActor: Start Session: " + loadSpec)
 
-      val numberOfSlots = 4
+      val numberOfSlots = 10
       
       cancellables = numberOfRequestPerSlot(numberOfSlots, loadSpec.numberOfRequestPerSecond).map(numberOfRequests => {
         val index = numberOfRequests._2
