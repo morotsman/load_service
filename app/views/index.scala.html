@@ -47,23 +47,29 @@
 					class="load_service_container row flippable {{resource.currentSide}}">
 					<div style="background-color: #fafafa;"
 						class="flippable_content front">
-						<div class="col-md-9">
-							<h3>
+						<div class="col-md-8">
+							<h4>
 								<span ng-bind="resource.method"></span><span> </span><span
 									ng-bind="resource.url"></span>
-							</h3>
+							</h4>
 						</div>
 						<div ng-show="resource.status === 'Active'" class="col-md-1">
 							<button type="button" class="btn btn-info"
-								ng-click="stopSession(resource)" style="margin-top: 20px">Stop</button>
+								ng-click="stopSession(resource)" style="margin-top: 20px">
+								<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+							</button>
 						</div>
 						<div ng-show="resource.status === 'Inactive'" class="col-md-1">
 							<button type="button" class="btn btn-info"
-								ng-click="startSession(resource)" style="margin-top: 20px">Start</button>
+								ng-click="startSession(resource)" style="margin-top: 20px">
+								<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+								</button>
 						</div>
 						<div class="col-md-1">
 							<button type="button" class="btn btn-info"
-								ng-click="showInfo($index)" style="margin-top: 20px">Info</button>
+								ng-click="showInfo($index)" style="margin-top: 20px">
+								 <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+								</button>
 						</div>
 
 
@@ -108,15 +114,21 @@
 							</div>
 							<div ng-show="resource.status === 'Active'" class="col-md-1">
 								<button type="button" class="btn btn-info"
-									ng-click="stopSession(resource)" style="margin-top: 20px">Stop</button>
+									ng-click="stopSession(resource)" style="margin-top: 20px">
+									<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+									</button>
 							</div>
 							<div ng-show="resource.status === 'Inactive'" class="col-md-1">
 								<button type="button" class="btn btn-info"
-									ng-click="startSession(resource)" style="margin-top: 20px">Start</button>
+									ng-click="startSession(resource)" style="margin-top: 20px">
+									<span class="glyphicon glyphicon-play" aria-hidden="true"></span>									
+									</button>
 							</div>
 							<div class="col-md-2">
 								<button type="button" class="btn btn-info"
-									ng-click="showInfo($index)" style="margin-top: 20px">Load service</button>
+									ng-click="showInfo($index)" style="margin-top: 20px">
+									<span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+									</button>
 							</div>
 							<div class="col-md-6">
 							<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
