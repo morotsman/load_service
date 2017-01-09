@@ -5,6 +5,7 @@ import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import akka.util.Timeout
 import model._
+import LoadManagerActor._
 
 object StatisticsActor {
   def props = Props[StatisticsActor]
@@ -13,8 +14,7 @@ object StatisticsActor {
   case class SuccessfulRequest(loadSpec: ResourceKey,timeInMillis: Long)
   case class AgggregateStatistcs()
 
-  case class LoadResourceCreated(loadSpec: ResourceKey)
-  case class LoadResourceDeleted(loadSpec: ResourceKey)
+
   case class HistoricData(resource: ResourceKey, actor: ActorRef)
   
 

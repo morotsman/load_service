@@ -99,11 +99,19 @@
 					<div style="background-color: #fafafa;"
 						class="flippable_content back">
 
-							<div class="col-md-10">
+							<div class="col-md-8">
 								<h4>
 									<span ng-bind="resource.method"></span><span> </span><span
 										ng-bind="resource.url"></span>
 								</h4>
+							</div>
+							<div ng-show="resource.status === 'Active'" class="col-md-1">
+								<button type="button" class="btn btn-info"
+									ng-click="stopSession(resource)" style="margin-top: 20px">Stop</button>
+							</div>
+							<div ng-show="resource.status === 'Inactive'" class="col-md-1">
+								<button type="button" class="btn btn-info"
+									ng-click="startSession(resource)" style="margin-top: 20px">Start</button>
 							</div>
 							<div class="col-md-2">
 								<button type="button" class="btn btn-info"

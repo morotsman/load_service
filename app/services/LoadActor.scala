@@ -66,7 +66,7 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
       }
 
     case Failure(e) =>
-      throw new LoadConnectException(loadSpec.id)
+      throw new LoadConnectException(loadSpec.id, e)
     case _ =>
       println("Handle error")
   }

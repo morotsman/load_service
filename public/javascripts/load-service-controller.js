@@ -12,7 +12,7 @@ require([ 'angular', './load-service-dao'], function() {
 				var maxNumberOfStatistics = 100;
 		
 				var websocket = new WebSocket("ws://localhost:9001/ws");
-				websocket.onmessage = updateStatistics
+				websocket.onmessage = handleWebsocketMessage
 
 				$scope.newLoadResource = newLoadResource; 
 				$scope.createLoadResource = createLoadResource;
@@ -204,21 +204,29 @@ require([ 'angular', './load-service-dao'], function() {
 					updatePlot(currentData[0], numberOfRequests);
 				}
 				
-				function updateStatistics(msg) {
+				function handleWebsocketMessage(msg) {
 					var data = JSON.parse(msg.data);
 					var type = data.type;
 					if(type === "statisticsEvents") {
-						data.events.forEach(function(e){
-							handleEvent(e);
-						});
+						data.events.forEach(function(e){ handleStatisticEvent(e);});
+					} else if(type === "statisticsEvent"){
+						handleStatisticEvent(data);
+					} else if (type === "fatalError"){
+						handleFatalError(data);
 					} else {
-						handleEvent(data);
+						console.log("Unknown websocket message: " + data);
 					}
 					
 					$scope.$apply();
 				}	
 				
-				function handleEvent(event) {
+				function handleFatalError(data) {
+					var resource = data.resource;
+					var cause = data.cause;
+					replaceLoadResource(resource);
+				}
+				
+				function handleStatisticEvent(event) {
 					var eventType = event.eventType
 					var numberOfRequests = event.numberOfRequestsPerSecond;
 					var latancy = event.avargeLatancyInMillis;

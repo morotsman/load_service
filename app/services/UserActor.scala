@@ -9,6 +9,7 @@ import play.api.Configuration
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.libs.json._
 import services.StatisticsActor._
+import LoadManagerActor._
 
 import model.ResourceKey
 
@@ -20,6 +21,7 @@ class UserActor @Inject()(@Assisted out: ActorRef,
     super.preStart()
     context.system.eventStream.subscribe(context.self, classOf[StatisticsEvent])
     context.system.eventStream.subscribe(context.self, classOf[StatisticEvents])
+    context.system.eventStream.subscribe(context.self, classOf[FatalError])
   }
   
   override def postStop(): Unit = {
@@ -54,8 +56,10 @@ class UserActor @Inject()(@Assisted out: ActorRef,
       val eventsAsJson = events.reverse.map { e => 
          Json.obj("type" -> "statisticsEvent", "resource" -> e.loadResource, "numberOfRequestsPerSecond" -> e.numberOfRequests, "eventType" -> e.eventType, "avargeLatancyInMillis" -> e.avargeTimeInMillis)
       }
-      out ! Json.obj("events" -> eventsAsJson, "type" -> "statisticsEvents")
-     
+      out ! Json.obj("type" -> "statisticsEvents", "events" -> eventsAsJson)
+    case FatalError(resource,e) =>
+      val errorEvent = Json.obj("type" -> "fatalError", "resource" -> resource, "cause" -> e.getMessage)
+      out ! errorEvent
     case unknown@_ => 
       println("Unknown message received by UserActor: " + unknown)
   }

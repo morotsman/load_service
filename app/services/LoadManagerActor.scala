@@ -31,6 +31,10 @@ object LoadManagerActor {
   case class StartLoadSession(name: String)
   case class EndLoadSession(name: String)
   
+  case class LoadResourceCreated(resource: ResourceKey)
+  case class LoadResourceDeleted(resource: ResourceKey)
+  case class FatalError(resource: ResourceKey, e: Throwable)
+  
   
 }
 
@@ -50,7 +54,8 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
           r <- loadResources.get(id)
         ) {
           loadResources = loadResources + (id -> r.copy(status = Some("Inactive")))
-        }
+          context.system.eventStream.publish(FatalError(ResourceKey(r.method,r.url, id), e.cause))
+        }     
         Stop
       case t =>
         super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)

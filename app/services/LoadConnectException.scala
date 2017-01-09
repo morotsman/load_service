@@ -1,3 +1,3 @@
 package services
 
-class LoadConnectException(val id: Option[String]) extends RuntimeException
+class LoadConnectException(val id: Option[String], val cause: Throwable) extends RuntimeException
