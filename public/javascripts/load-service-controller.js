@@ -168,11 +168,29 @@ require([ 'angular', './load-service-dao'], function() {
 					});
 				}
 				
+				/*
+				 create: false,
+						id: loadSpec.id,
+						method: loadSpec.method,
+						url: loadSpec.url,
+						body: loadSpec.body,	
+						status: loadSpec.status,
+						numberOfRequestPerSecond: loadSpec.numberOfRequestPerSecond,
+						maxTimeForRequestInMillis: loadSpec.maxTimeForRequestInMillis,
+						currentSide: getCurrentSide(loadSpec.id),
+						plotData : getCurrentPlotData(loadSpec.id)
+				 */
 				function replaceLoadResource(resource) {
 					loadServiceDao.getLoadResource(resource.id).then(function(data) {
-						var resource = data.data;
-						var index = resourceIndex($scope.loadResourceList, resource);
-						$scope.loadResourceList.splice(index,1, toLoadResource(resource));
+						var newResource = data.data;
+						var index = resourceIndex($scope.loadResourceList, newResource);
+						var oldResource = $scope.loadResourceList[index];
+						oldResource.method = newResource.method;
+						oldResource.url = newResource.url;
+						oldResource.body = newResource.body;
+						oldResource.status = newResource.status;
+						oldResource.numberOfRequestPerSecond = newResource.numberOfRequestPerSecond;
+						oldResource.maxTimeForRequestInMillis = newResource.maxTimeForRequestInMillis;
 					});
 				}
 				
