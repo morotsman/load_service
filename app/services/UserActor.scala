@@ -30,7 +30,11 @@ class UserActor @Inject()(@Assisted out: ActorRef,
   }
 
   var observedMocks : Set[ResourceKey]= Set() 
-   
+
+  def eventToJson(e: StatisticsEvent):JsObject = 
+    Json.obj("type" -> "statisticsEvent", "resource" -> e.loadResource, "numberOfRequestsPerSecond" -> e.numberOfRequests, 
+             "eventType" -> e.eventType, "avargeLatancyInMillis" -> e.avargeTimeInMillis, "maxTimeInMillis" -> e.maxTimeInMillis, "minTimeInMillis" -> e.minTimeInMillis)
+  
 
   override def receive: Receive = LoggingReceive {
 
@@ -49,14 +53,10 @@ class UserActor @Inject()(@Assisted out: ActorRef,
       }      
     case event@StatisticsEvent(resource,numberOfRequests, eventType, avargeTime, maxTime, minTime) =>
       if(observedMocks.contains(resource)) {
-         val statisticsEvent = Json.obj("type" -> "statisticsEvent", "resource" -> resource, "numberOfRequestsPerSecond" -> numberOfRequests, 
-             "eventType" -> eventType, "avargeLatancyInMillis" -> avargeTime, "maxTimeInMillis" -> maxTime, "minTimeInMillis" -> minTime)
-         out ! statisticsEvent
+         out ! eventToJson(event)
       }
     case StatisticEvents(events) =>
-      val eventsAsJson = events.reverse.map { e => 
-         Json.obj("type" -> "statisticsEvent", "resource" -> e.loadResource, "numberOfRequestsPerSecond" -> e.numberOfRequests, "eventType" -> e.eventType, "avargeLatancyInMillis" -> e.avargeTimeInMillis)
-      }
+      val eventsAsJson = events.reverse.map {eventToJson}
       out ! Json.obj("type" -> "statisticsEvents", "events" -> eventsAsJson)
     case FatalError(resource,e) =>
       val errorEvent = Json.obj("type" -> "fatalError", "resource" -> resource, "cause" -> e.getMessage)

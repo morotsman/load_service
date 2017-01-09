@@ -51,7 +51,7 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
         complexRequest.delete
       }   
 
-      val tmp = futureResult.recover({
+      futureResult.recover({
         case e : ConnectException => 
           println("ConnectException")
           self ! Failure(e)

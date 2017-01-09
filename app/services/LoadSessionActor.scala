@@ -32,7 +32,10 @@ class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClien
     OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
       case _: LoadConnectException => 
         Escalate
+      case _:NullPointerException =>
+        Escalate
       case t =>
+        println("LoadSessionActor supervisor: " + t);
         super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
     }
   

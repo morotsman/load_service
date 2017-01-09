@@ -45,6 +45,7 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
 
   var index: Integer = 0
   
+  
   override val supervisorStrategy =
     OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
       case e: LoadConnectException => 
@@ -56,6 +57,8 @@ class LoadManagerActor(val ws: WSClient) extends Actor {
           loadResources = loadResources + (id -> r.copy(status = Some("Inactive")))
           context.system.eventStream.publish(FatalError(ResourceKey(r.method,r.url, id), e.cause))
         }     
+        Stop
+      case e: NullPointerException =>
         Stop
       case t =>
         super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
