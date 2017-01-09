@@ -6,7 +6,8 @@ requirejs.config({
   paths: {
     'angular': ['../lib/angularjs/angular'],
     'jquery': ['../lib/jquery/jquery.min'],
-    'flot': ['../lib/flot/jquery.flot']
+    'flot': ['../lib/flot/jquery.flot'],
+    'toastr': ['../lib/angular-toastr/angular-toastr.tpls']
   },
   shim: {
 	'angular': {
@@ -19,16 +20,19 @@ requirejs.config({
      },
      'flot': {
          deps: ['jquery']
+     },
+     'toastr' : {
+    	 deps: ['angular']
      }
   }
 });
 
-require(['angular','flot','./load-service-controller', './load-service-plot-directive'],
+require(['angular','flot','./load-service-controller', './load-service-plot-directive', 'toastr'],
   function(angular, flot,controllers) {
 
     // Declare app level module which depends on filters, and services
 
-    var app = angular.module('loadService', [ 'loadService.load-service-controller', 'loadService.loadServicePlot']);
+    var app = angular.module('loadService', [ 'loadService.load-service-controller', 'loadService.loadServicePlot', 'toastr']);
     
     var $html = angular.element(document.getElementsByTagName('html')[0]);
 

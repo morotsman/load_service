@@ -7,8 +7,8 @@ require([ 'angular', './load-service-dao'], function() {
 	var controllers = angular.module('loadService.load-service-controller',
 			[ 'loadService.load-service-dao' ]);
 
-	controllers.controller('loadServiceCtrl', [ '$scope', 'loadServiceDao','$q','$timeout',
-			function($scope, loadServiceDao, $q, $timeout) {
+	controllers.controller('loadServiceCtrl', [ '$scope', 'loadServiceDao','$q','$timeout','toastr',
+			function($scope, loadServiceDao, $q, $timeout, toastr) {
 				var maxNumberOfStatistics = 100;
 		
 				var websocket = new WebSocket("ws://localhost:9001/ws");
@@ -22,6 +22,7 @@ require([ 'angular', './load-service-dao'], function() {
 				$scope.stopSession = stopSession;
 				$scope.loadResourceList = [];
 				$scope.showInfo = showInfo;
+				
 				
 				$scope.failedChartOptions = {
 						series: {shadowSize: 0},
@@ -230,6 +231,7 @@ require([ 'angular', './load-service-dao'], function() {
 					var resource = data.resource;
 					var cause = data.cause;
 					replaceLoadResource(resource);
+					toastr.error(cause, 'Fatal Error');
 				}
 				
 				function handleStatisticEvent(event) {
