@@ -53,20 +53,24 @@
 									ng-bind="resource.url"></span>
 							</h4>
 						</div>
-						<div class="btn-group col-md-2" role="group" aria-label="...">						
-								<button type="button" class="btn btn-default"
+						<div class="btn-group col-md-2" role="group" aria-label="...">		
+								<button title="Update" type="button" class="btn btn-default"
+									ng-click="updateLoadResource(resource)" style="margin-top: 0px">
+									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+								</button>				
+								<button title="Delete" type="button" class="btn btn-default"
 									ng-click="deleteLoadResource(resource)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 								</button>
-								<button ng-show="resource.status === 'Active'" type="button" class="btn btn-default"
+								<button title="Stop session" ng-show="resource.status === 'Active'" type="button" class="btn btn-default"
 									ng-click="stopSession(resource)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
 								</button>
-								<button ng-show="resource.status === 'Inactive'" type="button" class="btn btn-default"
+								<button title="Start session" ng-show="resource.status === 'Inactive'" type="button" class="btn btn-default"
 									ng-click="startSession(resource)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 									</button>
-								<button type="button" class="btn btn-default"
+								<button title="Show statistics" type="button" class="btn btn-default"
 									ng-click="showInfo($index)" style="margin-top: 0px">
 									 <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
 									</button>
@@ -91,12 +95,6 @@
 							<textarea rows="5" ng-model="resource.body" class="form-control"
 								id="body" placeholder="Body"></textarea>
 						</div>
-						<div style="margin-top: 20px" class="col-md-2">
-							<p>
-								<button class="btn btn-default" ng-click="updateLoadResource(resource)">Update
-									service</button>
-							</p>
-						</div>
 					</div>
 					<div style="background-color: #fafafa;"
 						class="flippable_content back">
@@ -108,19 +106,23 @@
 								</h4>
 							</div>
 							<div class="btn-group col-md-2" role="group" aria-label="...">
-								<button type="button" class="btn btn-default"
+								<button title="Update" type="button" class="btn btn-default"
+									ng-click="updateLoadResource(resource)" style="margin-top: 0px">
+									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+								</button>
+								<button title="Delete" type="button" class="btn btn-default"
 									ng-click="deleteLoadResource(resource)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 								</button>							
-								<button ng-show="resource.status === 'Active'" type="button" class="btn btn-default"  
+								<button title="Stop session" ng-show="resource.status === 'Active'" type="button" class="btn btn-default"  
 									ng-click="stopSession(resource)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
 								</button>
-								<button ng-show="resource.status === 'Inactive'" type="button" class="btn btn-default"
+								<button title="Start session" ng-show="resource.status === 'Inactive'" type="button" class="btn btn-default"
 									ng-click="startSession(resource)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-play" aria-hidden="true"></span>									
 								</button>
-								<button type="button" class="btn btn-default"
+								<button title="Detailed configuration" type="button" class="btn btn-default"
 									ng-click="showInfo($index)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-home" aria-hidden="true"></span>
 								</button>
@@ -153,12 +155,6 @@
 										</div>
 									</div>
 								</div> 
-							</div>
-							<div style="margin-top: 20px" class="col-md-2">
-								<p>
-									<button class="btn btn-default" ng-click="updateLoadResource(resource)">Update
-										service</button>
-								</p>
 							</div>
 					</div>
 					
@@ -202,12 +198,6 @@
 								service</button>
 						</p>
 
-					</div>
-					<div style="margin-top: 20px" class="col-md-2">
-						<p>
-							<button class="btn btn-danger" ng-click="deleteLoadResource(resource)">Delete
-								service</button>
-						</p>
 					</div>
 				</div>
 			</div>

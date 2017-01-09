@@ -237,7 +237,7 @@ require([ 'angular', './load-service-dao'], function() {
 				
 				function updateFailedPlot(resource, event) {
 					var currentData = getResource(resource.id).plotData.failedPlotData;	
-					updatePlot(currentData[0], event.avargeLatancyInMillis);
+					updatePlot(currentData[0], event.numberOfRequestsPerSecond);
 				}
 				
 				function handleStatisticEvent(event) {
