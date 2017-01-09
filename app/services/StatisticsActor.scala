@@ -18,7 +18,7 @@ object StatisticsActor {
   case class HistoricData(resource: ResourceKey, actor: ActorRef)
   
 
-  case class StatisticsEvent(loadResource: ResourceKey, numberOfRequests: Int, eventType: String, avargeTimeInMillis: Long)
+  case class StatisticsEvent(loadResource: ResourceKey, numberOfRequests: Int, eventType: String, avargeTimeInMillis: Long, maxTimeInMillis: Long, minTimeInMillis: Long)
   case class StatisticEvents(events: List[StatisticsEvent])
 }
 
@@ -66,6 +66,14 @@ class StatisticsActor extends Actor {
   def avarege(l : List[Long]): Option[Long] = 
     if(l.size == 0) None
     else Some(l.sum/l.size)
+    
+  def max(l: List[Long]): Option[Long] =   
+    if(l.size == 0) None
+    else Some(l.max)
+    
+  def min(l: List[Long]): Option[Long] =   
+    if(l.size == 0) None
+    else Some(l.min)    
 
   def receive = {
     case FailedRequest(r, e, t) => 
@@ -86,17 +94,17 @@ class StatisticsActor extends Actor {
     case AgggregateStatistcs =>
       context.system.scheduler.scheduleOnce(1000.millis, self, AgggregateStatistcs)
       successfulRequestsLastSecond.foreach(s => {
-        val event = StatisticsEvent(s._1, s._2.size, "successful", avarege(s._2).getOrElse(0))
+        val event = StatisticsEvent(s._1, s._2.size, "successful", avarege(s._2).getOrElse(0), max(s._2).getOrElse(0), min(s._2).getOrElse(0))
         addHistoricData(s._1, event)
         context.system.eventStream.publish(event)
       })
       failedRequestsLastSecond.foreach(s => {  
-        val totalFailures = StatisticsEvent(s._1, s._2.size, "failed", 0)
+        val totalFailures = StatisticsEvent(s._1, s._2.size, "failed", 0, 0, 0)
         context.system.eventStream.publish(totalFailures)
         addHistoricData(s._1, totalFailures)
         val aggregatedFailures = aggregateFailure(s._2)
         aggregatedFailures.foreach(e => {
-          val event = StatisticsEvent(s._1, e._2, e._1, 0)
+          val event = StatisticsEvent(s._1, e._2, e._1, 0, 0, 0)
           println(event)
           context.system.eventStream.publish(event)
         })

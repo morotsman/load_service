@@ -47,9 +47,10 @@ class UserActor @Inject()(@Assisted out: ActorRef,
         println("UserActor: unwatch");
         observedMocks = observedMocks - resource
       }      
-    case event@StatisticsEvent(resource,numberOfRequests, eventType, t) =>
+    case event@StatisticsEvent(resource,numberOfRequests, eventType, avargeTime, maxTime, minTime) =>
       if(observedMocks.contains(resource)) {
-         val statisticsEvent = Json.obj("type" -> "statisticsEvent", "resource" -> resource, "numberOfRequestsPerSecond" -> numberOfRequests, "eventType" -> eventType, "avargeLatancyInMillis" -> t)
+         val statisticsEvent = Json.obj("type" -> "statisticsEvent", "resource" -> resource, "numberOfRequestsPerSecond" -> numberOfRequests, 
+             "eventType" -> eventType, "avargeLatancyInMillis" -> avargeTime, "maxTimeInMillis" -> maxTime, "minTimeInMillis" -> minTime)
          out ! statisticsEvent
       }
     case StatisticEvents(events) =>

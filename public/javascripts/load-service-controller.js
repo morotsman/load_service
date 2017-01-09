@@ -29,7 +29,7 @@ require([ 'angular', './load-service-dao'], function() {
 						xaxis: {
 							show: false
 						},	
-						legend: { position: "se"}
+						legend: { position: "nw"}
 					}
 				
 				$scope.sucessfulChartOptions = {
@@ -37,7 +37,7 @@ require([ 'angular', './load-service-dao'], function() {
 						xaxis: {
 							show: false
 						},
-						legend: { position: "se"},
+						legend: { position: "nw"},
 						yaxes: [ { min: 0 }, {
 							min:0,
 							alignTicksWithAxis: 1,
@@ -200,16 +200,7 @@ require([ 'angular', './load-service-dao'], function() {
 					plotData.push([nextIndex,data]);
 				}
 				
-				function updateSuccessfulPlot(resource, numberOfRequests, latancy) {
-					var currentData = getResource(resource.id).plotData.successfulPlotData;	
-					updatePlot(currentData[0], numberOfRequests);
-					updatePlot(currentData[1], latancy);
-				}
-				
-				function updateFailedPlot(resource, numberOfRequests) {
-					var currentData = getResource(resource.id).plotData.failedPlotData;	
-					updatePlot(currentData[0], numberOfRequests);
-				}
+
 				
 				function handleWebsocketMessage(msg) {
 					var data = JSON.parse(msg.data);
@@ -231,17 +222,31 @@ require([ 'angular', './load-service-dao'], function() {
 					var resource = data.resource;
 					var cause = data.cause;
 					replaceLoadResource(resource);
+					console.log("Fatal error: " + cause);
 					toastr.error(cause, 'Fatal Error');
+				}
+				
+				function updateSuccessfulPlot(resource, event) {
+					var currentData = getResource(resource.id).plotData.successfulPlotData;	
+					updatePlot(currentData[0], event.numberOfRequestsPerSecond);
+					updatePlot(currentData[1], event.avargeLatancyInMillis);
+					updatePlot(currentData[2], event.maxTimeInMillis);
+					updatePlot(currentData[3], event.minTimeInMillis);
+					console.log(event.avargeLatancyInMillis + " " + event.maxTimeInMillis + " " + event.minTimeInMillis);
+				}
+				
+				function updateFailedPlot(resource, numberOfRequests) {
+					var numberOfRequests = event.numberOfRequestsPerSecond;
+					var currentData = getResource(resource.id).plotData.failedPlotData;	
+					updatePlot(currentData[0], numberOfRequests);
 				}
 				
 				function handleStatisticEvent(event) {
 					var eventType = event.eventType
-					var numberOfRequests = event.numberOfRequestsPerSecond;
-					var latancy = event.avargeLatancyInMillis;
 					if(eventType === "successful") {
-						updateSuccessfulPlot(event.resource, numberOfRequests, latancy);
+						updateSuccessfulPlot(event.resource, event);
 					} else if(eventType === "failed") {
-						updateFailedPlot(event.resource, numberOfRequests);
+						updateFailedPlot(event.resource, event);
 					}
 				}
 				
@@ -255,7 +260,7 @@ require([ 'angular', './load-service-dao'], function() {
 					}
 					
 					if(!currentResource.plotData.successfulPlotData) {
-						currentResource.plotData.successfulPlotData = [{ label: "Req/s", data: []}, { label: "Latancy", data: [], yaxis:2}];
+						currentResource.plotData.successfulPlotData = [{ label: "Req/s", data: []}, { label: "Avg Latancy", data: [], yaxis:2},{ label: "Max Latancy", data: [], yaxis:2},{ label: "Min Latancy", data: [], yaxis:2}];
 					}
 					
 					if(!currentResource.plotData.failedPlotData) {
