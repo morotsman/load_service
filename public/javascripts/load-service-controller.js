@@ -235,10 +235,9 @@ require([ 'angular', './load-service-dao'], function() {
 					console.log(event.avargeLatancyInMillis + " " + event.maxTimeInMillis + " " + event.minTimeInMillis);
 				}
 				
-				function updateFailedPlot(resource, numberOfRequests) {
-					var numberOfRequests = event.numberOfRequestsPerSecond;
+				function updateFailedPlot(resource, event) {
 					var currentData = getResource(resource.id).plotData.failedPlotData;	
-					updatePlot(currentData[0], numberOfRequests);
+					updatePlot(currentData[0], event.avargeLatancyInMillis);
 				}
 				
 				function handleStatisticEvent(event) {
