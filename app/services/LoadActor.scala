@@ -24,7 +24,7 @@ object LoadActor {
 
 class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
   import LoadActor._
-
+  
   val eventBus = context.system.eventStream
   
   
@@ -32,6 +32,17 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
     super.postRestart(reason)
     println(s"Restarted because of ${reason.getMessage}")
   }
+  
+  def isValid(r: WSResponse):Boolean = {
+    var result = true
+    if(!loadSpec.expectedResponseCode.isEmpty) {
+      result = loadSpec.expectedResponseCode.contains(r.status + "")
+    }
+    if(!loadSpec.expectedBody.isEmpty) {
+      result = result && loadSpec.expectedBody.contains(r.body)
+    }
+    return result
+  }  
   
   def receive = {
     case SendRequest(requestNumber) =>
@@ -63,7 +74,14 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
       })
       
       loadSpec.id foreach { id => 
-        futureResult.map(_ => SuccessfulRequest(ResourceKey(loadSpec.method, loadSpec.url, id), System.currentTimeMillis - startTime)).foreach(eventBus.publish)
+        futureResult.map(r => {
+          if(isValid(r)) {
+            SuccessfulRequest(ResourceKey(loadSpec.method, loadSpec.url, id), System.currentTimeMillis - startTime)
+          } else {
+            FailedRequest(ResourceKey(loadSpec.method, loadSpec.url, id), new RuntimeException("Failed validation"), System.currentTimeMillis - startTime)
+          }
+          
+        }).foreach(eventBus.publish)
       }
 
     case Failure(e) =>

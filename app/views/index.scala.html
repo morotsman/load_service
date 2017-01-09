@@ -75,26 +75,43 @@
 									 <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
 									</button>
 						</div>
-						
-					
-
-
-						<div class="col-md-6">
-							<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
-								type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
-								id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
-						</div>
-						<div class="col-md-6">
-							<label for="numberOfRequestPerSecond">Number of requests per second</label> <input
-								type="text" ng-model="resource.numberOfRequestPerSecond"
-								class="form-control" id="numberOfRequestPerSecond"
-								placeholder="Number of requests per second">
-						</div>
 						<div class="col-md-12">
-							<label for="body">Body</label>
-							<textarea rows="5" ng-model="resource.body" class="form-control"
-								id="body" placeholder="Body"></textarea>
-						</div>
+						<uib-tabset active="active">
+    						<uib-tab index="0" heading="Request">
+								<div class="col-md-6">
+									<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
+										type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
+										id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
+								</div>
+								<div class="col-md-6">
+									<label for="numberOfRequestPerSecond">Number of requests per second</label> <input
+										type="text" ng-model="resource.numberOfRequestPerSecond"
+										class="form-control" id="numberOfRequestPerSecond"
+										placeholder="Number of requests per second">
+								</div>
+								<div class="col-md-12">
+									<label for="body">Body</label>
+									<textarea rows="5" ng-model="resource.body" class="form-control"
+										id="body" placeholder="Body"></textarea>
+								</div>    						
+    						</uib-tab>
+    						<uib-tab index="1" heading="Validation">
+    							<div class="col-md-12">
+									<label for="expectedResponseCode">Expected response code</label> <input
+										type="text" ng-model="resource.expectedResponseCode" class="form-control"
+										id="expectedResponseCode" placeholder="Expected response code">
+								</div>
+								<div class="col-md-12">
+									<label for="expectedBody">Expected Body</label>
+									<textarea rows="5" ng-model="resource.expectedBody" class="form-control"
+										id="expectedBody" placeholder="Expected body"></textarea>
+								</div>
+    						</uib-tab>
+    					</uib-tabset>	
+    					</div>
+
+
+						
 					</div>
 					<div style="background-color: #fafafa;"
 						class="flippable_content back">

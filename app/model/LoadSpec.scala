@@ -3,7 +3,8 @@ package model
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-case class LoadSpec(val method: String, val url: String, val numberOfRequestPerSecond: Int, val maxTimeForRequestInMillis: Int, val body: String, val status: Option[String], val id: Option[String])
+case class LoadSpec(val method: String, val url: String, val numberOfRequestPerSecond: Int, val maxTimeForRequestInMillis: Int, 
+    val body: String, val status: Option[String], val id: Option[String], val expectedBody: Option[String], val expectedResponseCode: Option[String])
 
 object LoadSpec {
   implicit val loadSpecWrites = new Writes[LoadSpec] {
@@ -14,7 +15,10 @@ object LoadSpec {
       "maxTimeForRequestInMillis" -> loadSpec.maxTimeForRequestInMillis,
       "body" -> loadSpec.body,
       "status" -> loadSpec.status,
-      "id" -> loadSpec.id);
+      "id" -> loadSpec.id,
+      "expectedBody" -> loadSpec.expectedBody,
+      "expectedResponseCode" -> loadSpec.expectedResponseCode
+      );
 
   }
 
@@ -25,6 +29,8 @@ object LoadSpec {
     (JsPath \ "maxTimeForRequestInMillis").read[Int] and
     (JsPath \ "body").read[String] and 
     (JsPath \ "status").readNullable[String] and 
-    (JsPath \ "id").readNullable[String])(LoadSpec.apply _)
+    (JsPath \ "id").readNullable[String] and 
+    (JsPath \ "expectedBody").readNullable[String]  and 
+    (JsPath \ "expectedResponseCode").readNullable[String])(LoadSpec.apply _)
 
 }
