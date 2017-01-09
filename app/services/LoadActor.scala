@@ -53,6 +53,7 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
 
       val tmp = futureResult.recover({
         case e : ConnectException => 
+          println("ConnectException")
           self ! Failure(e)
         case e =>
           loadSpec.id foreach { id => 

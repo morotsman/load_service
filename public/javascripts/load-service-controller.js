@@ -168,18 +168,6 @@ require([ 'angular', './load-service-dao'], function() {
 					});
 				}
 				
-				/*
-				 create: false,
-						id: loadSpec.id,
-						method: loadSpec.method,
-						url: loadSpec.url,
-						body: loadSpec.body,	
-						status: loadSpec.status,
-						numberOfRequestPerSecond: loadSpec.numberOfRequestPerSecond,
-						maxTimeForRequestInMillis: loadSpec.maxTimeForRequestInMillis,
-						currentSide: getCurrentSide(loadSpec.id),
-						plotData : getCurrentPlotData(loadSpec.id)
-				 */
 				function replaceLoadResource(resource) {
 					loadServiceDao.getLoadResource(resource.id).then(function(data) {
 						var newResource = data.data;
