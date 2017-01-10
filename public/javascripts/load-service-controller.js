@@ -95,6 +95,8 @@ require([ 'angular', './load-service-dao'], function() {
 						status: loadSpec.status,
 						numberOfRequestPerSecond: loadSpec.numberOfRequestPerSecond,
 						maxTimeForRequestInMillis: loadSpec.maxTimeForRequestInMillis,
+						expectedResponseCode: loadSpec.expectedResponseCode,
+						expectedBody: loadSpec.expectedBody,
 						currentSide: getCurrentSide(loadSpec.id),
 						plotData : getCurrentPlotData(loadSpec.id)
 					};
@@ -180,6 +182,8 @@ require([ 'angular', './load-service-dao'], function() {
 						oldResource.status = newResource.status;
 						oldResource.numberOfRequestPerSecond = newResource.numberOfRequestPerSecond;
 						oldResource.maxTimeForRequestInMillis = newResource.maxTimeForRequestInMillis;
+						oldResource.expectedResponseCode = newResource.expectedResponseCode;
+						oldResource.expectedBody = newResource.expectedBody;
 					});
 				}
 				
