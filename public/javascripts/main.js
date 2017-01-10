@@ -31,12 +31,12 @@ requirejs.config({
   }
 });
 
-require(['angular','flot','./load-service-controller', './load-service-plot-directive', 'toastr', 'angular-ui'],
+require(['angular','flot','./load-service-controller', './load-service-plot-directive', 'toastr', 'angular-ui', './load-service-name-value-directive'],
   function(angular, flot,controllers) {
 
     // Declare app level module which depends on filters, and services
 
-    var app = angular.module('loadService', [ 'loadService.load-service-controller', 'loadService.loadServicePlot', 'toastr', 'ui.bootstrap']);
+    var app = angular.module('loadService', [ 'loadService.load-service-controller', 'loadService.loadServicePlot', 'toastr', 'ui.bootstrap', 'loadService.lsNameValue']);
     
     var $html = angular.element(document.getElementsByTagName('html')[0]);
 

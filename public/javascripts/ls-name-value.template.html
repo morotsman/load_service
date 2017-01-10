@@ -1,0 +1,38 @@
+
+<table class='table table-striped table-hover'>
+	       
+	    <!--   
+	    <thead>
+	      <tr>
+	        <th>{{nameLabel}}</th>
+	        <th>Value</th>
+	        <th></th>
+	      </tr>
+	    </thead>
+	    -->
+	    <tbody>
+	      <tr ng-repeat="nameValue in nameValues"> 	
+	      	<td>
+	      		<input id="{{'name' + $index}}" type="text" ng-model="nameValue.name" class="form-control" id="name" placeholder="{{nameLabel}}"> 
+	      	</td>
+	      	<td>
+	      		<input type="text" ng-model="nameValue.value" class="form-control" id="value" placeholder="Value"> 	      	
+	      	</td>
+	      	<td>
+	      		<span style="cursor:pointer" class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="deleteEntry($index)"></span>
+	      	</td>
+	      </tr>
+	      <tr>
+	      	<td>
+	      		<input type="text" class="form-control" id="name" placeholder="{{nameLabel}}" ng-click="addEntry()"> 
+	      	</td>
+	      	<td>
+	      		<input type="text" class="form-control" id="value" placeholder="Value" ng-click="addEntry()"> 	      	
+	      	</td> 
+	      </tr>
+	    </tbody>
+	    
+</table>
+
+	  
+	  
