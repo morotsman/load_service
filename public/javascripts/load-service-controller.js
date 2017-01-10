@@ -20,8 +20,12 @@ require([ 'angular', './load-service-dao'], function() {
 				$scope.deleteLoadResource= deleteLoadResource;
 				$scope.startSession = startSession;
 				$scope.stopSession = stopSession;
-				$scope.loadResourceList = [];
+				//$scope.loadResourceList = [];
 				$scope.showInfo = showInfo;
+				
+				$scope.notImplemented = function() {
+					window.alert("Sorry, this function is not implemeted yet.");
+				};
 				
 				
 				$scope.failedChartOptions = {
@@ -63,8 +67,7 @@ require([ 'angular', './load-service-dao'], function() {
 				}
 				
 				function getCurrentSide(id) {
-					var current = getResource(id);
-					if(current) {
+					if($scope.loadResourceList && getResource(id)) {
 						return current.currentSide;
 					} else {
 						return "flippable_front";
@@ -73,8 +76,7 @@ require([ 'angular', './load-service-dao'], function() {
 				}
 				
 				function getCurrentPlotData(id) {
-					var current = getResource(id);
-					if(current) {
+					if($scope.loadResourceList && getResource(id)) {
 						return current.plotData;
 					} else {
 						return {};
