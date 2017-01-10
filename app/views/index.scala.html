@@ -43,34 +43,33 @@
 			</div>
 			
 			<div ng-repeat="resource in loadResourceList">
-				<div ng-show="!resource.create"
-					class="load_service_container row flippable {{resource.currentSide}}">
+				<div class="load_service_container row flippable {{resource.currentSide}}">
 					<div style="background-color: #fafafa;"
 						class="flippable_content front">
 						<div class="col-md-10">
-							<h4>
+							<h4 ng-show="!resource.create">
 								<span ng-bind="resource.method"></span><span> </span><span
 									ng-bind="resource.url"></span>
 							</h4>
 						</div>
 						<div class="btn-group col-md-2" role="group" aria-label="...">		
-								<button title="Update" type="button" class="btn btn-default"
-									ng-click="updateLoadResource(resource)" style="margin-top: 0px">
+								<button title="Save" type="button" class="btn btn-default"
+									ng-click="saveLoadResource(resource, $index)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
 								</button>				
 								<button title="Delete" type="button" class="btn btn-default"
-									ng-click="deleteLoadResource(resource)" style="margin-top: 0px">
+									ng-click="deleteLoadResource(resource,$index)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 								</button>
-								<button title="Stop session" ng-show="resource.status === 'Active'" type="button" class="btn btn-default"
+								<button ng-disabled="resource.create" ng-disabled="resource.create" title="Stop session" ng-show="resource.status === 'Active'" type="button" class="btn btn-default"
 									ng-click="stopSession(resource)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
 								</button>
-								<button title="Start session" ng-show="resource.status === 'Inactive'" type="button" class="btn btn-default"
+								<button ng-disabled="resource.create" title="Start session" ng-show="resource.status === 'Inactive'" type="button" class="btn btn-default"
 									ng-click="startSession(resource)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 									</button>
-								<button title="Show statistics" type="button" class="btn btn-default"
+								<button ng-disabled="resource.create" title="Show statistics" type="button" class="btn btn-default"
 									ng-click="showInfo($index)" style="margin-top: 0px">
 									 <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
 									</button>
@@ -78,6 +77,20 @@
 						<div class="col-md-12">
 						<uib-tabset active="active">
     						<uib-tab index="0" heading="Request">
+	    						<div ng-show="resource.create" class="col-md-6">
+									<label for="method">Http Method</label>
+									<select class="form-control" name="method" ng-model="resource.method">
+								    	<option value="GET">GET</option>
+								      	<option value="PUT">PUT</option>
+								      	<option value="POST">POST</option>
+								      	<option value="DELETE">DELETE</option>
+								    </select>
+								</div>
+								<div ng-show="resource.create" class="col-md-6">
+									<label for="path">Url</label> <input type="text"
+										ng-model=resource.url class="form-control" id="url"
+										placeholder="Path to resource">
+								</div>
 								<div class="col-md-6">
 									<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
 										type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
@@ -116,15 +129,15 @@
 					<div style="background-color: #fafafa;"
 						class="flippable_content back">
 
-							<div class="col-md-10">
+							<div ng-show="!resource.create" class="col-md-10">
 								<h4>
 									<span ng-bind="resource.method"></span><span> </span><span
 										ng-bind="resource.url"></span>
 								</h4>
 							</div>
 							<div class="btn-group col-md-2" role="group" aria-label="...">
-								<button title="Update" type="button" class="btn btn-default"
-									ng-click="updateLoadResource(resource)" style="margin-top: 0px">
+								<button title="Save" type="button" class="btn btn-default"
+									ng-click="saveLoadResource(resource, $index)" style="margin-top: 0px">
 									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
 								</button>
 								<button title="Delete" type="button" class="btn btn-default"
@@ -145,9 +158,9 @@
 								</button>
 							</div>
 							<div class="col-md-6">
-							<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
-								type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
-								id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
+								<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
+									type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
+									id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
 							</div>
 							<div class="col-md-6">
 								<label for="numberOfRequestPerSecond">Number of requests per second</label> <input
@@ -176,7 +189,7 @@
 					</div>
 					
 				</div>
-
+				<!--  
 				<div style="background-color: #fafafa;" class="row load_service_container"
 					ng-show="resource.create">
 					<div class="col-md-6">
@@ -218,6 +231,8 @@
 					</div>
 				</div>
 			</div>
+			-->
+		</div>
 			<div style="background-color: #fafafa;" class="row load_service_container" ng-show="!serviceUnderConstruction">
 				<div style="margin-top: 100px" class="col-md-12 text-center">
 					<p>

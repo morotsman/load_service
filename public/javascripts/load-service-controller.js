@@ -16,7 +16,7 @@ require([ 'angular', './load-service-dao'], function() {
 
 				$scope.newLoadResource = newLoadResource; 
 				$scope.createLoadResource = createLoadResource;
-				$scope.updateLoadResource = updateLoadResource;
+				$scope.saveLoadResource = saveLoadResource;
 				$scope.deleteLoadResource= deleteLoadResource;
 				$scope.startSession = startSession;
 				$scope.stopSession = stopSession;
@@ -133,6 +133,14 @@ require([ 'angular', './load-service-dao'], function() {
 					$scope.serviceUnderConstruction = false;
 				}
 				
+				function saveLoadResource(resource, index) {
+					if(resource.create){
+						createLoadResource(index);
+					} else {
+						updateLoadResource(resource);
+					}	
+				}				
+				
 				function updateLoadResource(resource) {
 					if(resource.status === 'Active') {
 						loadServiceDao.deleteSession(resource).then(function(){
@@ -142,9 +150,7 @@ require([ 'angular', './load-service-dao'], function() {
 						})
 					} else {
 						loadServiceDao.updateLoadResource(resource);
-					}
-					
-					
+					}					
 				}
 				
 				
@@ -155,14 +161,16 @@ require([ 'angular', './load-service-dao'], function() {
 					}).then(addResource);
 				}
 	
-				function deleteLoadResource(resource) {
+				function deleteLoadResource(resource, index) {
 					if(!resource.create) {
 						unWatchStatistics(resource);
 						loadServiceDao.deleteLoadResource(resource);
+						$scope.loadResourceList.splice(resourceIndex($scope.loadResourceList, resource),1);	
 					} else {
+						$scope.loadResourceList.splice(index,1);
 						addResource();
 					}
-					$scope.loadResourceList.splice(resourceIndex($scope.loadResourceList, resource),1);		
+						
 				}
 				
 				function resourceIndex(resourceList, resource) {
