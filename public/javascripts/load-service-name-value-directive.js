@@ -25,11 +25,10 @@ require([ 'angular', './load-service-dao' , 'flot'], function() {
 	    	
 	    	function addEntry() {
 	    		$scope.nameValues.push({"name" : "", "value": ""});
-	    		//$timeout(function() {
-	    		//	var id = '#name' + ($scope.nameValues.length-1);
-	    			//$(id).trigger("click");
-	    		    //angular.element(id).triggerHandler('click');
-	    		//},1000);
+	    		var id = '#name' + $scope.nameLabel  + ($scope.nameValues.length-1);
+	    		$timeout(function() {
+	    			$(id).focus();
+	    		},1)
 	    	}
 	    	
 	    }]

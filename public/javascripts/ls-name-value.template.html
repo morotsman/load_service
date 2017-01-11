@@ -13,7 +13,7 @@
 	    <tbody>
 	      <tr ng-repeat="nameValue in nameValues"> 	
 	      	<td>
-	      		<input id="{{'name' + $index}}" type="text" ng-model="nameValue.name" class="form-control" id="name" placeholder="{{nameLabel}}"> 
+	      		<input id="{{'name' + nameLabel + $index}}" type="text" ng-model="nameValue.name" class="form-control" id="name" placeholder="{{nameLabel}}"> 
 	      	</td>
 	      	<td>
 	      		<input type="text" ng-model="nameValue.value" class="form-control" id="value" placeholder="Value"> 	      	
