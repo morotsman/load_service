@@ -35,7 +35,9 @@ define([ 'angular' ], function(angular) {
 				maxTimeForRequestInMillis : parseInt(loadResource.maxTimeForRequestInMillis),
 				body: loadResource.body,
 				expectedResponseCode: loadResource.expectedResponseCode?loadResource.expectedResponseCode:undefined,
-				expectedBody: loadResource.expectedBody?loadResource.expectedBody:undefined
+				expectedBody: loadResource.expectedBody?loadResource.expectedBody:undefined,
+				headers: loadResource.headers?loadResource.headers:undefined,
+				requestParameters: loadResource.requestParameters?loadResource.requestParameters:undefined
 			};
 		}
 		

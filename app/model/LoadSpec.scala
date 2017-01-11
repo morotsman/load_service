@@ -3,34 +3,22 @@ package model
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
+case class NameValue(val name: String, val value: String)
+
+object NameValue {
+  
+  implicit val itemReads = Json.reads[NameValue]
+  implicit val itemWrites = Json.writes[NameValue]  
+}
+
+
 case class LoadSpec(val method: String, val url: String, val numberOfRequestPerSecond: Int, val maxTimeForRequestInMillis: Int, 
-    val body: String, val status: Option[String], val id: Option[String], val expectedBody: Option[String], val expectedResponseCode: Option[String])
+    val body: String, val status: Option[String], val id: Option[String], val expectedBody: Option[String], 
+    val expectedResponseCode: Option[String], val headers: Option[Seq[NameValue]], val requestParameters: Option[Seq[NameValue]])
 
 object LoadSpec {
-  implicit val loadSpecWrites = new Writes[LoadSpec] {
-    def writes(loadSpec: LoadSpec) = Json.obj(
-      "method" -> loadSpec.method,
-      "url" -> loadSpec.url,
-      "numberOfRequestPerSecond" -> loadSpec.numberOfRequestPerSecond,
-      "maxTimeForRequestInMillis" -> loadSpec.maxTimeForRequestInMillis,
-      "body" -> loadSpec.body,
-      "status" -> loadSpec.status,
-      "id" -> loadSpec.id,
-      "expectedBody" -> loadSpec.expectedBody,
-      "expectedResponseCode" -> loadSpec.expectedResponseCode
-      );
-
-  }
-
-  implicit val loadSpecReads: Reads[LoadSpec] = (
-    (JsPath \ "method").read[String] and
-    (JsPath \ "url").read[String] and
-    (JsPath \ "numberOfRequestPerSecond").read[Int] and
-    (JsPath \ "maxTimeForRequestInMillis").read[Int] and
-    (JsPath \ "body").read[String] and 
-    (JsPath \ "status").readNullable[String] and 
-    (JsPath \ "id").readNullable[String] and 
-    (JsPath \ "expectedBody").readNullable[String]  and 
-    (JsPath \ "expectedResponseCode").readNullable[String])(LoadSpec.apply _)
-
+  
+  implicit val itemReads = Json.reads[LoadSpec]
+  implicit val itemWrites = Json.writes[LoadSpec]
+ 
 }

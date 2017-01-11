@@ -54,7 +54,8 @@ class LoadController @Inject() (actorSystem: ActorSystem,ws: WSClient)(implicit 
   
   def updateLoadResource(id: String) = Action.async(BodyParsers.parse.json) { request =>
     request.body.validate[LoadSpec].map {
-      loadSpec => (loadManagerActor ? UpdateLoadResource(id,loadSpec.copy(id = Some(id)))).mapTo[Option[LoadSpec]].map { 
+      loadSpec => 
+        (loadManagerActor ? UpdateLoadResource(id,loadSpec.copy(id = Some(id)))).mapTo[Option[LoadSpec]].map { 
         case Some(resource) => Ok(Json.toJson(resource)) 
         case None => NotFound  
       }

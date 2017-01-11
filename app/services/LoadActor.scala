@@ -25,6 +25,8 @@ object LoadActor {
 class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
   import LoadActor._
   
+  println(loadSpec)
+  
   val eventBus = context.system.eventStream
   
   
