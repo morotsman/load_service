@@ -14,7 +14,7 @@ object NameValue {
 
 case class LoadSpec(val method: String, val url: String, val numberOfRequestPerSecond: Int, val maxTimeForRequestInMillis: Int, 
     val body: String, val status: Option[String], val id: Option[String], val expectedBody: Option[String], 
-    val expectedResponseCode: Option[String], val headers: Option[Seq[NameValue]], val requestParameters: Option[Seq[NameValue]])
+    val expectedResponseCode: Option[String], val headers: Seq[NameValue], val requestParameters: Seq[NameValue])
 
 object LoadSpec {
   

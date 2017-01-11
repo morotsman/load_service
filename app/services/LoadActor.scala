@@ -25,7 +25,6 @@ object LoadActor {
 class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
   import LoadActor._
   
-  println(loadSpec)
   
   val eventBus = context.system.eventStream
   
@@ -50,10 +49,14 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
     case SendRequest(requestNumber) =>
       val startTime = System.currentTimeMillis
       val request: WSRequest = ws.url(loadSpec.url)
+      val headers = loadSpec.headers.map(nv => (nv.name, nv.value))
+      val queryString = loadSpec.requestParameters.map(nv => (nv.name, nv.value))
+      
       val complexRequest: WSRequest =
-        request.withHeaders("Accept" -> "application/json")
+        request.withHeaders(headers:_*)
           .withRequestTimeout(loadSpec.maxTimeForRequestInMillis.millis)
-          .withQueryString("search" -> "play")
+          .withQueryString(queryString:_*)
+          
       val futureResult: Future[WSResponse] = if (loadSpec.method == "GET") {
         complexRequest.get()
       } else if (loadSpec.method == "PUT") {
