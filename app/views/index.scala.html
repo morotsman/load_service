@@ -17,7 +17,7 @@
 	<br>
 	<div style="margin-left: 80px; margin-right: 80px" ng-cloak>
 
-		<div id="IntroPage" ng-hide="introCompleted">
+		<div id="IntroPage" ng-show="loadResourceList.length == 0">
 			<div style="background-color: #fafafa;" class="row load_service_container">
 				<div class="col-md-12 text-center">
 					<h1>Load service</h1>
@@ -55,7 +55,7 @@
 			</div>
 		</div>
 
-		<div id="resourcePage" ng-show="introCompleted">
+		<div id="resourcePage" ng-show="loadResourceList.length > 0">
 			<div class="row">
 				<div class="col-md-12 text-center"><h1>Load services</h1></div>
 			</div>
