@@ -24,7 +24,7 @@ require([ 'angular', './load-service-dao'], function() {
 				$scope.showInfo = showInfo;
 				
 				$scope.notImplemented = function() {
-					window.alert("Sorry, this function is not implemeted yet.");
+					window.alert("Sorry, this function is not implemented yet.");
 				};
 				
 				
