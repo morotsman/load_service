@@ -29,7 +29,7 @@
 				<div ng-show="loadResourceList.length == 0" style="margin-top: 200px">
 					<div class="col-md-12 text-center">
 						<p>
-							<button class="btn btn-primary btn-lg" ng-click="newLoadResource();introCompleted=true">New load service!</button>
+							<button class="btn btn-primary btn-lg" ng-click="newLoadResource();">New load service!</button>
 						</p>
 					</div>
 					<div class="col-md-12 text-center">
@@ -42,16 +42,7 @@
 							</button>
 						</p>
 					</div>					
-				</div>
-				<div ng-show="loadResourceList.length > 0" style="margin-top: 100px" class="col-md-12 text-center">
-					<p>
-						<button class="btn btn-primary btn-lg" ng-click="introCompleted=true">List load services</button>
-					</p>
 				</div>				
-				
-
-				
-				
 			</div>
 		</div>
 
@@ -204,6 +195,7 @@
 									<span class="glyphicon glyphicon-home" aria-hidden="true"></span>
 								</button>
 							</div>
+							
 							<div class="col-md-6">
 								<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
 									type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
@@ -215,24 +207,47 @@
 									class="form-control" id="numberOfRequestPerSecond"
 									placeholder="Number of requests per second">
 							</div>
-							<div class="container">
-								<div class="col-md-6">
-									<h4 class="text-center">Successful Requests</h4>
-									<div id="statistics" class="big-chart">
-										<div class="chart-holder">
-											<load-service-plot plot-options="sucessfulChartOptions" data="resource.plotData.successfulPlotData" class="chart"></load-service-plot>
+							<div class="col-md-12">
+								<uib-tabset active="active">
+	    							<uib-tab index="0" heading="Overview">
+			    						<div class="container">
+											<div class="col-md-6">
+												<h4 class="text-center">Successful Requests</h4>
+												<div id="statistics" class="big-chart">
+													<div class="chart-holder">
+														<load-service-plot plot-options="sucessfulChartOptions" data="resource.plotData.successfulPlotData" class="chart"></load-service-plot>
+													</div>
+												</div>
+											</div> 
+											<div class="col-md-6">
+												<h4 class="text-center">Failed Requests</h4>
+												<div id="statistics" class="big-chart">
+													<div>
+														<load-service-plot plot-options="failedChartOptions" data="resource.plotData.failedPlotData" class="chart"></load-service-plot>
+													</div>
+												</div>
+											</div> 
 										</div>
-									</div>
-								</div> 
-								<div class="col-md-6">
-									<h4 class="text-center">Failed Requests</h4>
-									<div id="statistics" class="big-chart">
-										<div class="chart-holder">
-											<load-service-plot plot-options="failedChartOptions" data="resource.plotData.failedPlotData" class="chart"></load-service-plot>
-										</div>
-									</div>
-								</div> 
-							</div>
+	    							</uib-tab>
+	    							<uib-tab index="1" heading="Successful Requests">
+	 										<div class="col-md-12">
+												<h4 class="text-center">Successful Requests</h4>
+												<div id="statistics">
+													<load-service-plot plot-options="sucessfulChartOptions" data="resource.plotData.successfulPlotData" class="chart" style="width:1000px"></load-service-plot>
+												</div>
+											</div>    							
+	    							</uib-tab>
+	    							<uib-tab index="2" heading="Failed Requests">
+											<div class="col-md-12">
+												<h4 class="text-center">Failed Requests</h4>
+												<div id="statistics" class="big-chart">
+													<load-service-plot plot-options="failedChartOptions" data="resource.plotData.failedPlotData" class="chart" style="width:1000px"></load-service-plot>
+												</div>
+											</div> 
+	    							</uib-tab>
+	    						</uib-tabset>
+	    					</div>
+							
 					</div>
 					
 				</div>

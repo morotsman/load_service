@@ -20,7 +20,6 @@ require([ 'angular', './load-service-dao'], function() {
 				$scope.deleteLoadResource= deleteLoadResource;
 				$scope.startSession = startSession;
 				$scope.stopSession = stopSession;
-				//$scope.loadResourceList = [];
 				$scope.showInfo = showInfo;
 				
 				$scope.notImplemented = function() {
