@@ -110,17 +110,29 @@
 										ng-model=resource.url class="form-control" id="url"
 										placeholder="Path to resource">
 								</div>
-								<div class="col-md-6">
+								<div class="col-md-12">
 									<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
 										type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
 										id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
 								</div>
-								<div class="col-md-6">
+								<div class="col-md-12">
 									<label for="numberOfRequestPerSecond">Number of requests per second</label> <input
 										type="text" ng-model="resource.numberOfRequestPerSecond"
 										class="form-control" id="numberOfRequestPerSecond"
 										placeholder="Number of requests per second">
-								</div>				   						
+								</div>	
+								<div class="col-md-12">
+									<label for="numberOfSendingSlots">Number of slots per second</label> <input
+										type="text" ng-model="resource.numberOfSendingSlots"
+										class="form-control" id="numberOfSendingSlots"
+										placeholder="Number of slots per second">
+								</div>	
+								<div class="col-md-12">
+									<label for="rampUpTimeInSeconds">Ramp up time in seconds</label> <input
+										type="text" ng-model="resource.rampUpTimeInSeconds"
+										class="form-control" id="rampUpTimeInSeconds"
+										placeholder="Ramp up time in seconds">
+								</div>											   						
     						</uib-tab>
     						<uib-tab index="1" heading="Body">
     							<div class="col-md-12">
@@ -158,8 +170,8 @@
 					</div>
 					<div style="background-color: #fafafa;"
 						class="flippable_content back">
-
-							<div ng-show="!resource.create" class="col-md-9">
+							<div class="row">
+							<div class="col-md-9">
 								<h4>
 									<span ng-bind="resource.method"></span><span> </span><span
 										ng-bind="resource.url"></span>
@@ -195,19 +207,28 @@
 									<span class="glyphicon glyphicon-home" aria-hidden="true"></span>
 								</button>
 							</div>
+							</div>
+							<div class="row">
+							<div class="col-md-3">
+								<label for="maxTimeForRequestInMillis">Max time for request in millis</label> 
+								<input type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control" id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
+							</div>
+							<div class="col-md-3">
+								<label for="numberOfRequestPerSecond">Number of requests per second</label> 
+								<input type="text" ng-model="resource.numberOfRequestPerSecond" class="form-control" id="numberOfRequestPerSecond" placeholder="Number of requests per second">
+							</div>
+							<div class="col-md-3">
+								<label for="numberOfSendingSlots">Number of slots per second</label> 
+								<input type="text" ng-model="resource.numberOfSendingSlots" class="form-control" id="numberOfSendingSlots" placeholder="Number of slots per second">
+							</div>
+							<div class="col-md-3">
+								<label for="rampUpTimeInSeconds">Ramp up time in seconds</label> 
+								<input type="text" ng-model="resource.rampUpTimeInSeconds" class="form-control" id="rampUpTimeInSeconds" placeholder="Ramp up time in seconds">
+							</div>
+							</div>		
 							
-							<div class="col-md-6">
-								<label for="maxTimeForRequestInMillis">Max time for request in millis</label> <input
-									type="text" ng-model="resource.maxTimeForRequestInMillis" class="form-control"
-									id="maxTimeForRequestInMillis" placeholder="Max time for request in millis">
-							</div>
-							<div class="col-md-6">
-								<label for="numberOfRequestPerSecond">Number of requests per second</label> <input
-									type="text" ng-model="resource.numberOfRequestPerSecond"
-									class="form-control" id="numberOfRequestPerSecond"
-									placeholder="Number of requests per second">
-							</div>
-							<div class="col-md-12">
+												
+							<div style="margin-top:5px" class="col-md-12">
 								<uib-tabset active="statistics">
 	    							<uib-tab index="0" heading="Overview">
 			    						<div class="container">
@@ -244,6 +265,9 @@
 													<load-service-plot plot-options="failedChartOptions" data="resource.plotData.failedPlotData" class="chart" style="width:1000px"></load-service-plot>
 												</div>
 											</div> 
+	    							</uib-tab>
+	    							<uib-tab index="3" heading="Report">
+	    								Add report
 	    							</uib-tab>
 	    						</uib-tabset>
 	    					</div>

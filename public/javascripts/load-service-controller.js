@@ -100,6 +100,8 @@ require([ 'angular', './load-service-dao'], function() {
 						expectedBody: loadSpec.expectedBody,
 						headers: loadSpec.headers,
 						requestParameters: loadSpec.requestParameters,
+						numberOfSendingSlots: loadSpec.numberOfSendingSlots,
+						rampUpTimeInSeconds: loadSpec.rampUpTimeInSeconds,
 						currentSide: getCurrentSide(loadSpec.id),
 						plotData : getCurrentPlotData(loadSpec.id)
 					};
@@ -197,6 +199,8 @@ require([ 'angular', './load-service-dao'], function() {
 						oldResource.expectedBody = newResource.expectedBody;
 						oldResource.headers = newResource.headers;
 						oldResource.requestParameters = newResource.requestParameters;
+						oldResource.numberOfSendingSlots = newResource.numberOfSendingSlots;
+						oldResource.rampUpTimeInSeconds = newResource.rampUpTimeInSeconds;
 					});
 				}
 				

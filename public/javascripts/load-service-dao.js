@@ -37,7 +37,9 @@ define([ 'angular' ], function(angular) {
 				expectedResponseCode: loadResource.expectedResponseCode?loadResource.expectedResponseCode:undefined,
 				expectedBody: loadResource.expectedBody?loadResource.expectedBody:undefined,
 				headers: loadResource.headers?loadResource.headers:undefined,
-				requestParameters: loadResource.requestParameters?loadResource.requestParameters:undefined
+				requestParameters: loadResource.requestParameters?loadResource.requestParameters:undefined,
+				numberOfSendingSlots: loadResource.numberOfSendingSlots?parseInt(loadResource.numberOfSendingSlots): undefined,
+				rampUpTimeInSeconds: loadResource.rampUpTimeInSeconds?parseInt(loadResource.rampUpTimeInSeconds): undefined,
 			};
 		}
 		

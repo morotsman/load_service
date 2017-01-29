@@ -21,6 +21,7 @@ object LoadSessionActor {
   case class StartSession()
   case class EndSession()
   case class SendRequests(numberOfRequests: Int)
+  case class IncreaseRampUp();
 }
 
 class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClient) extends Actor {
@@ -42,7 +43,10 @@ class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClien
   
   val loadActor = context.actorOf(LoadActor.props(ws, loadSpec), "load-actor-" + name)
   var cancellables: List[Cancellable] = Nil
-  var index = 0
+  var requestIndex = 0
+  var rampUpSecond = 0;
+  val numberOfSlots = loadSpec.numberOfSendingSlots.getOrElse(1)
+  val rampupTimeInSeconds = loadSpec.rampUpTimeInSeconds.getOrElse(1)
 
   def numberOfRequestPerSlot(nrOfSlots: Int, nrOfRequestPerSecond: Int): List[(Int, Int)] = {
     val rests = List.fill(nrOfRequestPerSecond % nrOfSlots)(1)
@@ -52,24 +56,28 @@ class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClien
 
   def receive = {
     case StartSession =>
-      println("LoadSessionActor: Start Session: " + loadSpec)
-
-      val numberOfSlots = 10
-      
+      println("LoadSessionActor: Start Session: " + loadSpec)  
       cancellables = numberOfRequestPerSlot(numberOfSlots, loadSpec.numberOfRequestPerSecond).map(numberOfRequests => {
-        val index = numberOfRequests._2
-        context.system.scheduler.schedule((index * (1000/numberOfSlots)).millis, 1000.millis, self, SendRequests(numberOfRequests._1))
+        val slotIndex = numberOfRequests._2
+        context.system.scheduler.schedule((slotIndex * (1000/numberOfSlots)).millis, 1000.millis, self, SendRequests(numberOfRequests._1))
       })
+      context.system.scheduler.scheduleOnce(1000.millis, self, IncreaseRampUp)
     case SendRequests(numberOfRequests) =>
+      val requestToSend = (rampUpSecond*numberOfRequests)/rampupTimeInSeconds
       for (
-        request <- index to (index + numberOfRequests - 1)
+        request <- requestIndex to (requestIndex + requestToSend - 1)
       ) { loadActor ! SendRequest(request) }
-      index = index + numberOfRequests - 1
+      requestIndex = requestIndex + numberOfRequests - 1
     case EndSession =>
       println("LoadSessionActor: Stop Session")
       cancellables.foreach { x => x.cancel }
       context.stop(loadActor)
       context.stop(self)
+    case IncreaseRampUp =>
+      if(rampUpSecond < rampupTimeInSeconds) {
+        rampUpSecond = rampUpSecond + 1
+        context.system.scheduler.scheduleOnce(1000.millis, self, IncreaseRampUp)
+      }
   }
 
 }
