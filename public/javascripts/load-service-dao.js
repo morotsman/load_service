@@ -40,6 +40,7 @@ define([ 'angular' ], function(angular) {
 				requestParameters: loadResource.requestParameters?loadResource.requestParameters:undefined,
 				numberOfSendingSlots: loadResource.numberOfSendingSlots?parseInt(loadResource.numberOfSendingSlots): undefined,
 				rampUpTimeInSeconds: loadResource.rampUpTimeInSeconds?parseInt(loadResource.rampUpTimeInSeconds): undefined,
+				fromNumberOfRequestPerSecond: loadResource.fromNumberOfRequestPerSecond?parseInt(loadResource.fromNumberOfRequestPerSecond): 0
 			};
 		}
 		
@@ -52,6 +53,7 @@ define([ 'angular' ], function(angular) {
 		}
 		
 		function updateLoadResource(loadResource) {
+			console.log(loadResource.fromNumberOfRequestPerSecond + " " + loadResource.numberOfRequestPerSecond);
 			return $http.put("load-resource/" + loadResource.id, mapLoadResource(loadResource));
 		}
 		

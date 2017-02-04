@@ -47,6 +47,7 @@ class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClien
   var rampUpSecond = 0;
   val numberOfSlots = loadSpec.numberOfSendingSlots.getOrElse(1)
   val rampupTimeInSeconds = loadSpec.rampUpTimeInSeconds.getOrElse(1)
+  val fromNumberOfRequestPerSecond = loadSpec.fromNumberOfRequestPerSecond.getOrElse(1)
 
   def numberOfRequestPerSlot(nrOfSlots: Int, nrOfRequestPerSecond: Int): List[(Int, Int)] = {
     val rests = List.fill(nrOfRequestPerSecond % nrOfSlots)(1)
@@ -63,7 +64,10 @@ class LoadSessionActor(val name: String, val loadSpec: LoadSpec, val ws: WSClien
       })
       context.system.scheduler.scheduleOnce(1000.millis, self, IncreaseRampUp)
     case SendRequests(numberOfRequests) =>
-      val requestToSend = (rampUpSecond*numberOfRequests)/rampupTimeInSeconds
+      val requestToSend = if(fromNumberOfRequestPerSecond/numberOfSlots < numberOfRequests) 
+                            fromNumberOfRequestPerSecond/numberOfSlots + (rampUpSecond*(numberOfRequests-fromNumberOfRequestPerSecond/numberOfSlots))/rampupTimeInSeconds
+                          else 
+                            numberOfRequests
       for (
         request <- requestIndex to (requestIndex + requestToSend - 1)
       ) { loadActor ! SendRequest(request) }

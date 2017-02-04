@@ -87,6 +87,7 @@ require([ 'angular', './load-service-dao'], function() {
 				}
 				
 				function toLoadResource(loadSpec) {
+					console.log(loadSpec);
 					return {
 						create: false,
 						id: loadSpec.id,
@@ -102,6 +103,7 @@ require([ 'angular', './load-service-dao'], function() {
 						requestParameters: loadSpec.requestParameters,
 						numberOfSendingSlots: loadSpec.numberOfSendingSlots,
 						rampUpTimeInSeconds: loadSpec.rampUpTimeInSeconds,
+						fromNumberOfRequestPerSecond: loadSpec.fromNumberOfRequestPerSecond,
 						currentSide: getCurrentSide(loadSpec.id),
 						plotData : getCurrentPlotData(loadSpec.id)
 					};
@@ -147,15 +149,8 @@ require([ 'angular', './load-service-dao'], function() {
 				}				
 				
 				function updateLoadResource(resource) {
-					if(resource.status === 'Active') {
-						loadServiceDao.deleteSession(resource).then(function(){
-							loadServiceDao.updateLoadResource(resource).then(function() {
-								loadServiceDao.createSession(resource);						
-							})
-						})
-					} else {
-						loadServiceDao.updateLoadResource(resource);
-					}					
+					console.log("hepp");
+					loadServiceDao.updateLoadResource(resource);				
 				}
 				
 				
@@ -201,11 +196,16 @@ require([ 'angular', './load-service-dao'], function() {
 						oldResource.requestParameters = newResource.requestParameters;
 						oldResource.numberOfSendingSlots = newResource.numberOfSendingSlots;
 						oldResource.rampUpTimeInSeconds = newResource.rampUpTimeInSeconds;
+						oldResource.fromNumberOfRequestPerSecond = newResource.fromNumberOfRequestPerSecond;
 					});
 				}
 				
 				function startSession(resource) {
-					loadServiceDao.createSession(resource).then(function() { replaceLoadResource(resource) });
+					loadServiceDao.updateLoadResource(resource).then(function() {
+						loadServiceDao.createSession(resource).then(function() { 
+							replaceLoadResource(resource) 
+						});
+					});		
 				}
 				
 				function stopSession(resource) {
@@ -253,7 +253,6 @@ require([ 'angular', './load-service-dao'], function() {
 					updatePlot(currentData[1], event.avargeLatancyInMillis);
 					updatePlot(currentData[2], event.maxTimeInMillis);
 					updatePlot(currentData[3], event.minTimeInMillis);
-					console.log(event.avargeLatancyInMillis + " " + event.maxTimeInMillis + " " + event.minTimeInMillis);
 				}
 				
 				function updateFailedPlot(resource, event) {
