@@ -11,7 +11,7 @@ require([ 'angular', './load-service-dao'], function() {
 			function($scope, loadServiceDao, $q, $timeout, toastr) {
 				var maxNumberOfStatistics = 100;
 		
-				var websocket = new WebSocket("ws://localhost:9001/ws");
+				var websocket = new WebSocket(getWsAddress());
 				websocket.onmessage = handleWebsocketMessage
 
 				$scope.newLoadResource = newLoadResource; 
@@ -25,6 +25,8 @@ require([ 'angular', './load-service-dao'], function() {
 				$scope.notImplemented = function() {
 					window.alert("Sorry, this function is not implemented yet.");
 				};
+				
+
 				
 				
 				$scope.failedChartOptions = {
@@ -299,6 +301,18 @@ require([ 'angular', './load-service-dao'], function() {
 					} else {
 						resource.currentSide = "flippable_front";
 					}
+				}
+				
+				function getWsAddress() {
+					var loc = window.location, new_uri;
+					if (loc.protocol === "https:") {
+					    new_uri = "wss:";
+					} else {
+					    new_uri = "ws:";
+					}
+					new_uri += "//" + loc.host;
+					new_uri += loc.pathname + "ws";
+					return new_uri;
 				}
 				
 				
