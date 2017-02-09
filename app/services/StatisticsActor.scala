@@ -10,7 +10,7 @@ import LoadManagerActor._
 object StatisticsActor {
   def props = Props[StatisticsActor]
 
-  case class FailedRequest(loadSpec: ResourceKey, e: Throwable, timeInMillis: Long)
+  case class FailedRequest(loadSpec: ResourceKey, e: String, timeInMillis: Long)
   case class SuccessfulRequest(loadSpec: ResourceKey,timeInMillis: Long)
   case class AgggregateStatistcs()
 
@@ -78,7 +78,7 @@ class StatisticsActor extends Actor {
   def receive = {
     case FailedRequest(r, e, t) => 
       failedRequestsLastSecond.get(r) foreach { f => 
-        failedRequestsLastSecond(r) = e.getClass.toString :: f
+        failedRequestsLastSecond(r) = e :: f
       }  
     case SuccessfulRequest(r, t) =>
       successfulRequestsLastSecond.get(r) foreach { s => 

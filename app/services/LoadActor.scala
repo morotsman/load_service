@@ -85,7 +85,7 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
         self ! Failure(e)
       case e =>
         loadSpec.id foreach { id =>
-          eventBus.publish(FailedRequest(ResourceKey(loadSpec.method, loadSpec.url, id), e, System.currentTimeMillis - startTime))
+          eventBus.publish(FailedRequest(ResourceKey(loadSpec.method, loadSpec.url, id), e.getClass.toString, System.currentTimeMillis - startTime))
         }
 
     })
@@ -95,7 +95,7 @@ class LoadActor(val ws: WSClient, val loadSpec: LoadSpec) extends Actor {
         if (isValid(r)) {
           SuccessfulRequest(ResourceKey(loadSpec.method, loadSpec.url, id), System.currentTimeMillis - startTime)
         } else {
-          FailedRequest(ResourceKey(loadSpec.method, loadSpec.url, id), new RuntimeException("Failed validation"), System.currentTimeMillis - startTime)
+          FailedRequest(ResourceKey(loadSpec.method, loadSpec.url, id), "Failed validation", System.currentTimeMillis - startTime)
         }
 
       }).foreach(eventBus.publish)
