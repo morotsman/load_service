@@ -67,7 +67,7 @@ class StatisticsController @Inject()(@Named("statisticsActor") statisticsActor: 
    */
   def sameOriginCheck(rh: RequestHeader): Boolean = {
     rh.headers.get("Origin") match {
-      case Some(originValue) if originMatches(originValue) =>
+      case Some(originValue) if originMatches(rh.host,originValue) =>
         logger.debug(s"originCheck: originValue = $originValue")
         true
 
@@ -84,8 +84,8 @@ class StatisticsController @Inject()(@Named("statisticsActor") statisticsActor: 
   /**
    * Returns true if the value of the Origin header contains an acceptable value.
    */
-  def originMatches(origin: String): Boolean = {
-    origin.contains("localhost:9001") || origin.contains("localhost:19001")
+  def originMatches(host: String, origin: String): Boolean = {
+    origin.contains(host)
   }
 
   /**
